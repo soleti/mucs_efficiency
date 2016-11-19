@@ -5,7 +5,7 @@ from ROOT import TFile, TChain
 from geomUtil import isect_line_plane_v3
 from glob import glob
         
-f = glob("../mucs_cry_overlay/MuCSCryMCGen/*/ana_hist.root")    
+f = glob("../mucs_cry_overlay/*/ana_hist.root")    
 entry = TChain("analysistree/anatree")
 for filename in f:
     entry.Add(filename)
