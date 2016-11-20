@@ -68,7 +68,7 @@ h_theta_phi_l_geant = TH3F("h_theta_phi_l_geant",";#theta [#circ]; #phi [#circ];
 
 
 print(entries)
-for entry in range(200):
+for entry in range(entries):
     
     if entry % 10 == 0: print(entry)
     
@@ -89,7 +89,6 @@ for entry in range(200):
             l = (chain.StartPointx_tpcAV[i]-chain.EndPointx_tpcAV[i])**2+(chain.StartPointy_tpcAV[i]-chain.EndPointy_tpcAV[i])**2+(chain.StartPointz_tpcAV[i]-chain.EndPointz_tpcAV[i])**2
             l = math.sqrt(l)
             h_theta_phi_l_geant.Fill(theta, phi, l)
-            primaries += 1
             
     indeces = []
 
@@ -113,7 +112,6 @@ for entry in range(200):
             dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))
             
             if index not in indeces and chain.inTPCDrifted[index] == 1 and chain.process_primary[index] == 1 and dist < 35:
-                reco += 1
                 x = chain.Px[index]
                 y = chain.Py[index]
                 z = chain.Pz[index]
@@ -148,8 +146,10 @@ for i in range(1, h_theta_phi_l_reco.GetNbinsX()+2):
                     h_geant.SetBinError(i,j,k,0)
                 h_theta_phi_l_reco.SetBinContent(i,j,k,eff)
                 h_theta_phi_l_reco.SetBinError(i,j,k,error)
-            
-print("Overall efficiency: %.1f%%" % round(reco/primaries*100,1))
+    
+overall_eff = h_reco.Integral()/h_geant.Integral()
+overall_eff_err = math.sqrt((overall_eff*(1-overall_eff))/h_geant.Integral())
+print("Overall efficiency: %.1f%% +- %.1f%%" % (round(overall_eff*100,1),round(overall_eff_err*100,1)))
 
 c_theta_phi = TCanvas("c_theta_phi")
 for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
