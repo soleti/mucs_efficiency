@@ -1,3 +1,5 @@
 *.root
 *.eps
 *.pdf
+*.txt
+*.pyc
