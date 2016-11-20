@@ -35,7 +35,7 @@ for entry in range(entries):
     cosmic_pe = chain.flash_pe
     l_mucs = chain.MuCS_TPC_len
     if entry % 1000 == 0: print(entry)
-    if chain.MuCS_NHitsX < 8 and chain.MuCS_NHitsZ < 8 and l_mucs > 0 and cosmic_pe > 0 and entry % 10 == 0:
+    if chain.MuCS_NHitsX < 8 and chain.MuCS_NHitsZ < 8 and l_mucs > 0 and cosmic_pe > 0 and entry % 100 == 10:
         x = chain.MuCS_Start_TPC[0]-chain.MuCS_Start[0]
         y = chain.MuCS_Start_TPC[1]-chain.MuCS_Start[1]
         z = chain.MuCS_Start_TPC[2]-chain.MuCS_Start[2]
@@ -58,7 +58,7 @@ for entry in range(entries):
             polyline.SetPoint(0, start[0], start[1], start[2])
             polyline.SetPoint(1, end[0], end[1], end[2])
 
-            #red_lines.append(polyline)
+            red_lines.append(polyline)
             
         if theta_mucs > 90 and theta_mucs < 105 and phi_mucs > -90 and phi_mucs < -45 and l_mucs > 200 and l_mucs < 260:
         
@@ -74,7 +74,7 @@ for entry in range(entries):
             polyline.SetPoint(0, start[0],start[1],start[2])
             polyline.SetPoint(1, end[0], end[1], end[2])
 
-            #blue_lines.append(polyline)
+            blue_lines.append(polyline)
                      
         if theta_mucs > 60 and theta_mucs < 75 and phi_mucs < -45 and phi_mucs > -60 and ((l_mucs > 200 and l_mucs < 260) or (l_mucs > 80 and l_mucs < 140)):
         
