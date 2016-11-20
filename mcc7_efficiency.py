@@ -113,7 +113,7 @@ for entry in range(200):
             p0_geant = [chain.StartPointx_drifted[index], chain.StartPointy_drifted[index], chain.StartPointz_drifted[index]]
             dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))
             
-            if index not in indeces and chain.inTPCDrifted[index] == 1 and chain.process_primary[index] == 1 and dist < 44:
+            if index not in indeces and chain.inTPCDrifted[index] == 1 and chain.process_primary[index] == 1 and dist < 35:
                 reco += 1
                 x = chain.Px[index]
                 y = chain.Py[index]
@@ -129,7 +129,7 @@ for entry in range(200):
                 indeces.append(index)
                        
         
-f_theta_phi_l = TFile("e_theta_phi_l_data.root")
+f_theta_phi_l = TFile("plots/data/e_theta_phi_l_pandoraCosmic.root")
 e_theta_phi_l = gDirectory.Get("h_theta_phi_l_tpc")
 h_reco = h_theta_phi_l_reco.Clone()
 h_geant = h_theta_phi_l_geant.Clone()
@@ -140,8 +140,6 @@ for i in range(1, h_theta_phi_l_reco.GetNbinsX()+2):
                 if e_theta_phi_l.GetBinContent(i,j,k) > 0:
                     eff = h_theta_phi_l_reco.GetBinContent(i,j,k)/h_theta_phi_l_geant.GetBinContent(i,j,k)
                     error = math.sqrt((eff*(1-eff))/h_theta_phi_l_geant.GetBinContent(i,j,k))
-                    #print(i,j,k,h_theta_phi_l_geant.GetXaxis().GetBinLowEdge(i),h_theta_phi_l_geant.GetYaxis().GetBinLowEdge(j),h_theta_phi_l_geant.GetZaxis().GetBinLowEdge(k))
-
                 else:
                     eff = 0
                     error = 0
@@ -210,7 +208,7 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsZ()+2):
         h_l_reco.SetLineColor(kRed+1)
         
 h_l_reco.Draw("hist")
-h_l_reco.GetYaxis().SetRangeUser(0,1)
+h_l_reco.GetYaxis().SetRangeUser(0.001,1.05)
 h_l_reco_clone = h_l_reco.Clone()
 h_l_reco_clone.SetFillStyle(3002)
 h_l_reco_clone.SetFillColor(kRed+1)
@@ -232,7 +230,7 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
 
 h_theta_reco.SetLineColor(kRed+1)
 h_theta_reco.Draw("hist")
-h_theta_reco.GetYaxis().SetRangeUser(0,1)
+h_theta_reco.GetYaxis().SetRangeUser(0.001,1.05)
 h_theta_reco_clone = h_theta_reco.Clone()
 h_theta_reco_clone.SetFillStyle(3002)
 h_theta_reco_clone.SetFillColor(kRed+1)
@@ -255,12 +253,12 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsY()+2):
 
 h_phi_reco.SetLineColor(kRed+1)
 h_phi_reco.Draw("hist")
-h_phi_reco.GetYaxis().SetRangeUser(0,1)
+h_phi_reco.GetYaxis().SetRangeUser(0.001,1.05)
 h_phi_reco_clone = h_phi_reco.Clone()
 h_phi_reco_clone.SetFillStyle(3002)
 h_phi_reco_clone.SetFillColor(kRed+1)
 h_phi_reco_clone.Draw("e2same")
-h_phi_reco_clone.SaveAs("phi_mcc7.root")
+h_phi_reco_clone.SaveAs("plots/mc/phi_mcc7.root")
 
 c_phi.Update()
 input()
