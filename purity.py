@@ -35,12 +35,15 @@ for event in range(entries):
 
             p_tpc = isect_line_plane_v3(p0, p1, p_co_tpc, p_no)
             mucs_event = entry.StartPointy[i] > 397 and entry.StartPointy[i] < 398
+
+            
             if mucs_event and p_tpc:
                 min_dist = 99999
                 min_id = 0
                 in_tpc += 1
                 
                 for n in range(entry.ntracks_pandoraCosmic):
+                    
                     best = entry.trkpidbestplane_pandoraCosmic[n]
                     trkid = entry.trkidtruth_pandoraCosmic[3*n+best]
                     p_reco = [entry.trkstartx_pandoraCosmic[n],entry.trkstarty_pandoraCosmic[n],entry.trkstartz_pandoraCosmic[n]]
@@ -48,10 +51,13 @@ for event in range(entries):
                     if dist < min_dist:
                         min_dist = dist
                         min_id = trkid
+                        trk_n = n
+                                        
                 if min_dist < 35:
-                    reco += 1
+                    reco += 1                    
                     if min_id == entry.TrackId[i]:
-                        mucs_reco += 1                      
+                        mucs_reco += 1  
+                                            
                     break
        
 eff = reco/in_tpc
