@@ -48,7 +48,7 @@ for event in range(entries):
                     if dist < min_dist:
                         min_dist = dist
                         min_id = trkid
-                if min_dist < 38:
+                if min_dist < 35:
                     reco += 1
                     if min_id == entry.TrackId[i]:
                         mucs_reco += 1                      
@@ -56,10 +56,10 @@ for event in range(entries):
        
 eff = reco/in_tpc
 eff_err = math.sqrt((eff*(1-eff))/in_tpc)
-print("Efficiency: %.1f +- %.1f"%(round(eff*100,1), round(eff_err*100,1)))
+print("Efficiency: %.2f +- %.2f"%(round(eff*100,2), round(eff_err*100,2)))
 
 purity = mucs_reco/reco
 purity_err = math.sqrt((purity*(1-purity))/reco)
-print("Purity: %.1f +- %.1f"%(round(purity*100,1), round(purity_err*100,1)))
+print("Purity: %.2f +- %.2f"%(round(purity*100,2), round(purity_err*100,2)))
 
 input()

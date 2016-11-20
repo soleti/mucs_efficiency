@@ -151,12 +151,11 @@ for entry in range(entries):
                 
         triggered += 1
 
-        if phi_mucs < -45:
-            h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, l_mucs)
+        h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, chain.MinD_len)
             
-            if xy_tpc and (chain.MinD_dist < 44 or not data):
-                reco += 1
-                h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, l_mucs)
+        if xy_tpc and (chain.MinD_dist < 35 or not data):
+            reco += 1
+            h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, chain.MinD_len)
 
 eff = reco/triggered
 err = math.sqrt((eff*(1-eff))/triggered)
@@ -307,7 +306,7 @@ c_theta = TCanvas("c_theta","theta")
 c_theta.cd()
 
 h_theta.Draw()
-h_theta.GetYaxis().SetRangeUser(0,1)
+h_theta.GetYaxis().SetRangeUser(0.001,1.05)
 h_theta.SetMarkerStyle(20)
 h_theta.SaveAs("plots/%s/e_theta_%s.root" % ("data" if data else "mc", algo))
 
@@ -317,7 +316,7 @@ c_phi = TCanvas("c_phi","phi")
 c_phi.cd()
 
 h_phi.Draw()
-h_phi.GetYaxis().SetRangeUser(0,1)
+h_phi.GetYaxis().SetRangeUser(0.001,1.05)
 h_phi.SetMarkerStyle(20)
 h_phi.SaveAs("plots/%s/e_phi_%s.root" % ("data" if data else "mc", algo))
 
@@ -327,7 +326,7 @@ c_l = TCanvas("c_l","l")
 c_l.cd()
 
 h_l.Draw("p")
-h_l.GetYaxis().SetRangeUser(0,1)
+h_l.GetYaxis().SetRangeUser(0.001,1.05)
 h_l.SetMarkerStyle(20)
 h_l.SaveAs("plots/%s/e_l_%s.root" % ("data" if data else "mc", algo))
 
