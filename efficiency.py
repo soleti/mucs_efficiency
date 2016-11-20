@@ -94,6 +94,12 @@ if position == "central_shift":
 if position == "upstream_shift":
     chain.Add("../mucs_merged/MuCSRun7702_Group182_MergedTree.Root")
     chain.Add("../mucs_merged/MuCSRun7703_Group183_MergedTree.Root")
+if position == "all":
+    chain.Add("../mucs_merged/MuCSRun7347_Group181_MergedTree.Root")
+    chain.Add("../mucs_merged/MuCSRun7348_Group181_MergedTree.Root")
+    chain.Add("../mucs_merged/CORSIKA.root")
+    chain.Add("../mucs_merged/MuCSRun7702_Group182_MergedTree.Root")
+    chain.Add("../mucs_merged/MuCSRun7703_Group183_MergedTree.Root")
     
 fidvol = 20
 x_start = 0
@@ -151,11 +157,12 @@ for entry in range(entries):
                 
         triggered += 1
 
-        h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, chain.MinD_len)
+        if chain.MinD_len < 320 and phi_mucs < -45:
+            h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, chain.MinD_len)
             
-        if xy_tpc and (chain.MinD_dist < 35 or not data):
-            reco += 1
-            h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, chain.MinD_len)
+            if xy_tpc and (chain.MinD_dist < 35 or not data):
+                reco += 1
+                h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, chain.MinD_len)
 
 eff = reco/triggered
 err = math.sqrt((eff*(1-eff))/triggered)
@@ -306,7 +313,7 @@ c_theta = TCanvas("c_theta","theta")
 c_theta.cd()
 
 h_theta.Draw()
-h_theta.GetYaxis().SetRangeUser(0.001,1.05)
+h_theta.GetYaxis().SetRangeUser(0,1)
 h_theta.SetMarkerStyle(20)
 h_theta.SaveAs("plots/%s/e_theta_%s.root" % ("data" if data else "mc", algo))
 
@@ -316,7 +323,7 @@ c_phi = TCanvas("c_phi","phi")
 c_phi.cd()
 
 h_phi.Draw()
-h_phi.GetYaxis().SetRangeUser(0.001,1.05)
+h_phi.GetYaxis().SetRangeUser(0,1)
 h_phi.SetMarkerStyle(20)
 h_phi.SaveAs("plots/%s/e_phi_%s.root" % ("data" if data else "mc", algo))
 
@@ -326,7 +333,7 @@ c_l = TCanvas("c_l","l")
 c_l.cd()
 
 h_l.Draw("p")
-h_l.GetYaxis().SetRangeUser(0.001,1.05)
+h_l.GetYaxis().SetRangeUser(0,1)
 h_l.SetMarkerStyle(20)
 h_l.SaveAs("plots/%s/e_l_%s.root" % ("data" if data else "mc", algo))
 
