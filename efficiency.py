@@ -3,6 +3,7 @@
 import os, sys
 import math
 from ROOT import TPad, gDirectory, TChain, TFile, TH1F, TH2F, TH3F, gStyle, TCanvas, gPad, TPaveText, kGray
+from geomUtil import isect_line_plane_v3
 
 if len(sys.argv) > 1:
     data = 1 if sys.argv[1] == "data" else 0
@@ -155,14 +156,35 @@ for entry in range(entries):
         phi_mucs = math.atan2(y,x)
         phi_mucs = math.degrees(phi_mucs)
                 
-        triggered += 1
 
         if chain.MinD_len < 320 and phi_mucs < -45:
-            h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, chain.MinD_len)
+            p_no_tpc = [0,1,0]
+            p_tpc = [0,y_end,0]
+            p0 = [chain.MinD_Start[0], chain.MinD_Start[1], chain.MinD_Start[2]]
+            p1 = [chain.MinD_End[0], chain.MinD_End[1], chain.MinD_End[2]]
+            intersect_tpc = isect_line_plane_v3(p0,p1,p_tpc,p_no_tpc)
+
+            length = chain.MinD_len
+
+            # if tracks enter the TPC from the anode, correct the length
+            if intersect_tpc[0] < 0:
+                p_no_anode = [1,0,0]
+                p_anode = [0,0,0]
+                intersect_anode = isect_line_plane_v3(p0,p1,p_anode,p_no_anode)
+                if intersect_anode: 
+                    length = math.sqrt(sum([(a-b)**2 for a,b in zip(intersect_anode,p1)]))
             
-            if xy_tpc and (chain.MinD_dist < 35 or not data):
-                reco += 1
-                h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, chain.MinD_len)
+            through_x = intersect_tpc[0] > x_start and intersect_tpc[0] < x_end
+            through_z = intersect_tpc[2] > z_start and intersect_tpc[2] < z_end
+            through_tpc = through_x and through_z
+            
+            if through_tpc:
+                triggered += 1
+                h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, length)
+            
+                if xy_tpc and (chain.MinD_dist < 35 or not data):
+                    reco += 1
+                    h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, length)
 
 eff = reco/triggered
 err = math.sqrt((eff*(1-eff))/triggered)
