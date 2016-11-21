@@ -1,4 +1,4 @@
-Measurement of the cosmic ray reconstruction efficiency in MicroBooNE using MuCS dataset
+###Measurement of the cosmic ray reconstruction efficiency in MicroBooNE using MuCS dataset
 
 * `efficiency.py` - measure the data reconstruction efficiency using MuCS merged dataset
 * `compare.py` - compare the data reconstruction efficiency with three different MuCS configurations
