@@ -18,10 +18,11 @@ p_co_tpc = [0,y_end,0]
 in_tpc = 0
 mucs_reco = 0
 reco = 0
+total_mucs_reco = 0
 
 entries = entry.GetEntries()
 print(entries)
-for event in range(entries):
+for event in range(1000):
     
     if event % 100 == 0: print(event)
     ientry = entry.LoadTree(event)
@@ -52,14 +53,15 @@ for event in range(entries):
                         min_dist = dist
                         min_id = trkid
                         trk_n = n
-                                        
+                             
                 if min_dist < 35:
                     reco += 1                    
                     if min_id == entry.TrackId[i]:
                         mucs_reco += 1  
                                             
                     break
-       
+                    
+                     
 eff = reco/in_tpc
 eff_err = math.sqrt((eff*(1-eff))/in_tpc)
 print("Efficiency: %.2f +- %.2f"%(round(eff*100,2), round(eff_err*100,2)))
@@ -67,5 +69,9 @@ print("Efficiency: %.2f +- %.2f"%(round(eff*100,2), round(eff_err*100,2)))
 purity = mucs_reco/reco
 purity_err = math.sqrt((purity*(1-purity))/reco)
 print("Purity: %.2f +- %.2f"%(round(purity*100,2), round(purity_err*100,2)))
+
+#reco_eff = total_mucs_reco/in_tpc
+#reco_eff_err = math.sqrt((reco_eff*(1-reco_eff))/in_tpc)
+#print("Total MuCS reco. efficiency: %.2f +- %.2f"%(round(reco_eff*100,2), round(reco_eff_err*100,2)))
 
 input()
