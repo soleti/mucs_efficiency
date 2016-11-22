@@ -109,19 +109,20 @@ for entry in range(entries):
             p0 = [x1,y1,z1]
             
             p0_geant = [chain.StartPointx_drifted[index], chain.StartPointy_drifted[index], chain.StartPointz_drifted[index]]
-            dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))
+            dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))            
             
             if index not in indeces and chain.inTPCDrifted[index] == 1 and chain.process_primary[index] == 1 and dist < 35:
+
                 x = chain.Px[index]
                 y = chain.Py[index]
                 z = chain.Pz[index]
                 r = chain.P[index]
                 theta = math.degrees(math.acos(z/r))
                 phi = math.degrees(math.atan2(y,x))
-                
+
                 l = (chain.StartPointx_tpcAV[index]-chain.EndPointx_tpcAV[index])**2+(chain.StartPointy_tpcAV[index]-chain.EndPointy_tpcAV[index])**2+(chain.StartPointz_tpcAV[index]-chain.EndPointz_tpcAV[index])**2
                 l = math.sqrt(l)
-                
+
                 h_theta_phi_l_reco.Fill(theta, phi, l)
                 indeces.append(index)
                        
