@@ -11,10 +11,10 @@ for filename in f:
     entry.Add(filename)
     
 y_end = 116.5
-
+        
 p_no = [0,1,0]
 p_co_tpc = [0,y_end,0]
-
+    
 in_tpc = 0
 mucs_reco = 0
 reco = 0
@@ -37,7 +37,6 @@ for event in range(1000):
             p_tpc = isect_line_plane_v3(p0, p1, p_co_tpc, p_no)
             mucs_event = entry.StartPointy[i] > 397 and entry.StartPointy[i] < 398
 
-            
             if mucs_event and p_tpc:
                 min_dist = 99999
                 min_id = 0
