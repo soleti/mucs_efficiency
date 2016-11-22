@@ -53,19 +53,18 @@ def extrapolate3D(hist):
                                 distances += [(l-i)**2+(j-m)**2+(k-n)**2]
                                 eff += [hist.GetBinContent(l,m,n)]
                                 eff_err += [hist.GetBinError(l,m,n)]
-                            
-                
+
                     minimum = min([d for i,d in enumerate(distances) if eff[i] > 0])
                     closest_eff = [eff[a] for a,b in enumerate(distances) if b == minimum and eff[a] > 0]
                     closest_eff_err = [eff_err[a] for a,b in enumerate(distances) if b == minimum and eff[a] > 0]
                     weights = [1/(err**2) for err in closest_eff_err]
-
+                    
                     eff_ave = weighted_mean(closest_eff, weights)
                     hist_ex.SetBinContent(i,j,k,eff_ave)
                     hist_ex.SetBinError(i,j,k,1/sum(weights))
-                    
+
     return hist_ex
-    
+
 
 gStyle.SetOptStat(0)
 gStyle.SetPalette(87)
@@ -179,15 +178,15 @@ for entry in range(entries):
             through_tpc = through_x and through_z
             
             if through_tpc:
-                triggered += 1
                 h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, length)
             
                 if xy_tpc and (chain.MinD_dist < 35 or not data):
                     reco += 1
+                
                     h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, length)
 
-eff = reco/triggered
-err = math.sqrt((eff*(1-eff))/triggered)
+eff = h_theta_phi_l_tpc.Integral()/h_theta_phi_l_mucs.Integral()
+err = math.sqrt((eff*(1-eff))/h_theta_phi_l_mucs.Integral())
 print("Integrated efficiency: %.1f +- %.1f"%(round(eff*100,1), round(err*100,1)))
 for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1, h_theta_phi_l_tpc.GetNbinsY()+2):
@@ -210,7 +209,9 @@ for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
                 eff = h_theta_phi_l_tpc.GetBinContent(i,j,k)/h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 mucs = h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 error = math.sqrt((eff*(1-eff))/mucs)
-
+                if h_theta_phi_l_tpc.GetBinContent(i,j,k) < 50: 
+                    print(i,j,k,h_theta_phi_l_tpc.GetBinContent(i,j,k),eff) 
+                    
                 print(i,j,k,eff,error,file=f)
                 h_theta_phi_l_tpc.SetBinContent(i,j,k,eff)
                 h_theta_phi_l_tpc.SetBinError(i,j,k,error)
@@ -232,11 +233,15 @@ h_theta = TH1F("h_theta", ";#theta [#circ];N. Entries / %i#circ" % int(90/bin_an
 h_phi = TH1F("h_phi", ";#phi [#circ];N. Entries / %i#circ" % int(180/bin_ang),bin_ang,-180,0)
 h_l = TH1F("h_l", ";L [cm];N. Entries / %i cm" % int((500-fidvol)/bin_len), bin_len, fidvol, 500)
 
+
 for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
 
     tpc = sum([h_tpc.GetBinContent(i,j,k) for j in range(1,h_tpc.GetNbinsY()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
     mucs = sum([h_mucs.GetBinContent(i,j,k) for j in range(1,h_mucs.GetNbinsY()+2) for k in range(1,h_mucs.GetNbinsZ()+2)])
     if tpc and mucs:
+
+
+        
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
         h_theta.SetBinContent(i,eff)
