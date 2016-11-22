@@ -22,8 +22,8 @@ total_mucs_reco = 0
 
 entries = entry.GetEntries()
 print(entries)
-for event in range(1000):
-    
+for event in range(entries):
+
     if event % 100 == 0: print(event)
     ientry = entry.LoadTree(event)
     nb = entry.GetEntry(event) 
