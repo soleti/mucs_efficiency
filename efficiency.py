@@ -119,9 +119,6 @@ triggered = 0
 reco = 0
 print(entries)
 
-#f_mip = TFile("mip_fit.root")
-#mip_cut = gDirectory.Get("f_pol")
-
 for entry in range(entries):
     if entry % 1000 == 0: print(entry)
     ientry = chain.LoadTree(entry)
@@ -129,9 +126,16 @@ for entry in range(entries):
     
     l_mucs = chain.MuCS_TPC_len
     x = chain.MuCS_Start_TPC[0]
-        
+    cosmic_pe = chain.flash_pe
+
+    # MIP fit
+    a = 7.316709647109627 
+    b = -0.0979316568443668
+    c = 0.0005124018261413519
+    d = -1.020167027369585e-06
+
     if data:
-        mip = l_mucs > 0 and chain.flash_pe > 0 #and cosmic_pe/l_mucs > 6.72 - 0.08*x + 0.00035*x*x - 5.72e-07*x*x*x - 0.7
+        mip = l_mucs > 0 and cosmic_pe > 0# and cosmic_pe/l_mucs > a + b*x + c*x**2 +d*x**3 - 0.75
         xy_tpc = math.degrees(chain.MinD_theta_xy)
         yz_tpc = math.degrees(chain.MinD_theta_yz)
     else:
@@ -210,7 +214,7 @@ for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
                 mucs = h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 error = math.sqrt((eff*(1-eff))/mucs)
                 if h_theta_phi_l_tpc.GetBinContent(i,j,k) < 50: 
-                    print(i,j,k,h_theta_phi_l_tpc.GetBinContent(i,j,k),eff) 
+                    print(i,j,k,h_theta_phi_l_tpc.GetBinContent(i,j,k),eff,error) 
                     
                 print(i,j,k,eff,error,file=f)
                 h_theta_phi_l_tpc.SetBinContent(i,j,k,eff)
@@ -232,20 +236,33 @@ h_phi_l = TH2F("h_phi_l",";#phi [#circ];L [cm]",bin_ang,-180,0,bin_len,fidvol,50
 h_theta = TH1F("h_theta", ";#theta [#circ];N. Entries / %i#circ" % int(90/bin_ang),bin_ang,0,180)
 h_phi = TH1F("h_phi", ";#phi [#circ];N. Entries / %i#circ" % int(180/bin_ang),bin_ang,-180,0)
 h_l = TH1F("h_l", ";L [cm];N. Entries / %i cm" % int((500-fidvol)/bin_len), bin_len, fidvol, 500)
-
+h_l_sys = TH1F("h_l_sys", ";L [cm];N. Entries / %i cm" % int((500-fidvol)/bin_len), bin_len, fidvol, 500)
+h_theta_sys = TH1F("h_theta_sys", ";#theta [#circ];N. Entries / %i#circ" % int(90/bin_ang),bin_ang,0,180)
+h_phi_sys = TH1F("h_phi_sys", ";#phi [#circ];N. Entries / %i#circ" % int(180/bin_ang),bin_ang,-180,0)
 
 for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
 
     tpc = sum([h_tpc.GetBinContent(i,j,k) for j in range(1,h_tpc.GetNbinsY()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
     mucs = sum([h_mucs.GetBinContent(i,j,k) for j in range(1,h_mucs.GetNbinsY()+2) for k in range(1,h_mucs.GetNbinsZ()+2)])
     if tpc and mucs:
-
-
-        
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
+        if i == 7:
+            sys_error = math.sqrt((eff*(1-eff))/mucs+0.087**2)
+            if eff+sys_error > 1:
+                sys_error = 1-eff
+        elif i == 5:
+            sys_error = math.sqrt((eff*(1-eff))/mucs+0.087*5/15**2)
+            if eff+sys_error > 1:
+                sys_error = 1-eff
+        else:
+            sys_error = error
+        
+
         h_theta.SetBinContent(i,eff)
         h_theta.SetBinError(i,error)
+        h_theta_sys.SetBinContent(i,eff)
+        h_theta_sys.SetBinError(i,sys_error)
         
 for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):   
     tpc = sum([h_tpc.GetBinContent(j,i,k) for j in range(1,h_tpc.GetNbinsX()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
@@ -253,8 +270,21 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
+        if i >= 7 and i < 9:
+            sys_error = math.sqrt((eff*(1-eff))/mucs+0.087*4/20**2)
+            if eff+sys_error > 1:
+                sys_error = 1-eff
+        elif i == 9:
+            sys_error = math.sqrt((eff*(1-eff))/mucs+0.087*8/20**2)
+            if eff+sys_error > 1:
+                sys_error = 1-eff
+        else:
+            sys_error = error
+
         h_phi.SetBinContent(i,eff)
         h_phi.SetBinError(i,error)
+        h_phi_sys.SetBinContent(i,eff)
+        h_phi_sys.SetBinError(i,sys_error)
 
 for i in range(1,h_theta_phi_l_tpc.GetNbinsZ()+2):
     tpc = sum([h_tpc.GetBinContent(j,k,i) for j in range(1,h_tpc.GetNbinsX()+2) for k in range(1,h_tpc.GetNbinsY()+2)])
@@ -262,8 +292,12 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsZ()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
+        sys_error = math.sqrt((eff*(1-eff))/mucs+(0.087*3/12+0.087/12)**2)
         h_l.SetBinContent(i,eff)
         h_l.SetBinError(i,error)
+        h_l_sys.SetBinContent(i,eff)
+        h_l_sys.SetBinError(i,sys_error)
+
 
 
 for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
@@ -272,7 +306,10 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
         mucs = sum([h_mucs.GetBinContent(i,j,k) for k in range(1,h_mucs.GetNbinsZ()+2)])
         if mucs and tpc:
             eff = tpc/mucs
-            error = math.sqrt((eff*(1-eff))/mucs)
+            if i == 7 and j >= 7 and j <= 9:
+                error = math.sqrt((eff*(1-eff))/mucs+0.087/5**2)
+            else:
+                error = math.sqrt((eff*(1-eff))/mucs)
             h_theta_phi.SetBinContent(i,j,eff)
             h_theta_phi.SetBinError(i,j,error)
 
@@ -343,6 +380,7 @@ h_theta.Draw()
 h_theta.GetYaxis().SetRangeUser(0,1)
 h_theta.SetMarkerStyle(20)
 h_theta.SaveAs("plots/%s/e_theta_%s.root" % ("data" if data else "mc", algo))
+h_theta_sys.SaveAs("plots/%s/e_theta_sys_%s.root" % ("data" if data else "mc", algo))
 
 c_theta.Update()
 
@@ -353,6 +391,7 @@ h_phi.Draw()
 h_phi.GetYaxis().SetRangeUser(0,1)
 h_phi.SetMarkerStyle(20)
 h_phi.SaveAs("plots/%s/e_phi_%s.root" % ("data" if data else "mc", algo))
+h_phi_sys.SaveAs("plots/%s/e_phi_sys_%s.root" % ("data" if data else "mc", algo))
 
 c_phi.Update()
 
@@ -363,7 +402,7 @@ h_l.Draw("p")
 h_l.GetYaxis().SetRangeUser(0,1)
 h_l.SetMarkerStyle(20)
 h_l.SaveAs("plots/%s/e_l_%s.root" % ("data" if data else "mc", algo))
-
+h_l_sys.SaveAs("plots/%s/e_l_sys_%s.root" % ("data" if data else "mc", algo))
 c_l.Update()
 
 gStyle.SetCanvasPreferGL(1)
