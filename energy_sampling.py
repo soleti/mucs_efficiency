@@ -27,10 +27,10 @@ bottom = [-80,0,117.5,116.5,560,660]
 bin_ang = 12
 bin_len = 8
 
-h_eff = TH1F("h_eff","",100,0,2)      
+h_eff = TH1F("h_eff",";Efficiency;N. Entries / 0.03",35,0,1.5)      
 
 
-files = [glob("../root_files/energy_sampling/*/ana_hist.root")]
+files = [glob("../root_files/energy_sampling/MuCSCryMCGen/*/ana_hist.root")]
         
 triggered = 0
 reco = 0
@@ -43,7 +43,7 @@ p_co_top = [top[0], top[2], top[4]]
 p_co_bottom = [bottom[0], bottom[2], bottom[4]]
 tot = files
 geant_trackIds = []
-elements = []
+
 for n,f in enumerate(tot):
     print(n)
     chain = TChain("analysistree/anatree")
@@ -88,22 +88,24 @@ for n,f in enumerate(tot):
                 
                 if dist < 35 and theta_data > 60 and theta_data < 75 and phi_data > -90 and phi_data < -75 and chain.pathlen[index] > 140 and chain.pathlen[index] < 200:
                     reco+=1
-                    elements.append(1)
 
-elements = (triggered-reco+5)*[0] + elements
+elements = (triggered-reco+56)*[0] + reco*[1]
 
 print(elements)
 for i in range(1000):
-    h_eff.Fill(sum(random.sample(elements,10))/11)
+    print(sum(random.sample(elements,25))/25)
+    h_eff.Fill(sum(random.sample(elements,25))/25)
     
 
 print(reco,triggered)
-eff = reco/(triggered+5)
+eff = reco/(triggered+56)
 error = math.sqrt((eff*(1-eff))/triggered) 
 print("Integrated efficiency",eff,error)
 
 
 c_eff = TCanvas("c_eff")
-h_eff.Draw()
+h_eff.Draw("ep")
+h_eff.SetMarkerStyle(20)
+h_eff.Fit("gaus")
 c_eff.Update()   
 input()
