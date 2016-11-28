@@ -8,3 +8,5 @@
 * `mc_data.py` - plot data efficiency and MCC7 Monte Carlo efficiency on the same canvas
 * `purity_efficiency_plot.py` - plot efficiency and purity as a function of the tolerance on the scattering
 * `geomUtil.py` - geometry utility library for 3D line-plane intersections, cross-product, dot-product, etc.
+* `energy_sampling.py` - measure the systematic error related to the energy sampling.
+
