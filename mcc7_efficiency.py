@@ -2,7 +2,7 @@
 
 from ROOT import TPad, gPad, gDirectory, TFile, gStyle, TChain, TH1F, TH2F, TH3F, TLine, TCanvas, TPad, kRed, kGray, kBlue, TBox
 import math
-
+from geomUtil import isect_line_plane_v3
 bin_ang = 12
 fidvol = 20
 bin_len = 8
@@ -73,6 +73,19 @@ h_l_reco = TH1F("h_l_reco",";L [cm]; N. Entries / 80 cm",bin_len,fidvol,500)
 h_theta_phi_l_reco = TH3F("h_theta_phi_l_reco",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 h_theta_phi_l_geant = TH3F("h_theta_phi_l_geant",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 
+anode_plane = [0,0,0]
+anode_no = [1,0,0]
+cathode_plane = [x_end,0,0]
+cathode_no = anode_no
+top_plane = [0,y_end,0]
+top_no = [0,1,0]
+bottom_plane = [0,y_start,0]
+bottom_no = top_no
+upstream_plane = [0,0,z_start]
+upstream_no = [0,0,1]
+downstream_plane = [0,0,z_end]
+downstream_no = upstream_no
+
 print(entries)
 for entry in range(1000):
     
@@ -98,9 +111,32 @@ for entry in range(1000):
             phi = math.degrees(math.atan2(y,x))
             l = (chain.StartPointx_tpcAV[i]-chain.EndPointx_tpcAV[i])**2+(chain.StartPointy_tpcAV[i]-chain.EndPointy_tpcAV[i])**2+(chain.StartPointz_tpcAV[i]-chain.EndPointz_tpcAV[i])**2
             l = math.sqrt(l)
+            h_theta_phi_l_geant.Fill(theta, phi, l)
+
             p0_geant = [chain.StartPointx_drifted[i], chain.StartPointy_drifted[i], chain.StartPointz_drifted[i]]
 
-            h_theta_phi_l_geant.Fill(theta, phi, l)
+            # p0_geant = [chain.StartPointx_tpcAV[i], chain.StartPointy_tpcAV[i], chain.StartPointz_tpcAV[i]]
+            # p1_geant = [chain.StartPointx_tpcAV[i]+x, chain.StartPointy_tpcAV[i]+y, chain.StartPointz_tpcAV[i]+z]
+            # anode_p = isect_line_plane_v3(p0_geant, p1_geant, anode_plane, anode_no)
+            # cathode_p = isect_line_plane_v3(p0_geant, p1_geant, cathode_plane, cathode_no)
+            # upstream_p = isect_line_plane_v3(p0_geant, p1_geant, upstream_plane, upstream_no)
+            # downstream_p = isect_line_plane_v3(p0_geant, p1_geant, downstream_plane, downstream_no)
+            # top_p = isect_line_plane_v3(p0_geant, p1_geant, top_plane, top_no)
+            # bottom_p = isect_line_plane_v3(p0_geant, p1_geant, bottom_plane, bottom_no)
+            # planes = [anode_p, cathode_p, upstream_p, downstream_p, top_p, bottom_p]
+            # points = []
+            # for p in planes:
+            #     if p[0] >= x_start and p[0] <= x_end and p[1] >= y_start and p[1] <= y_end and p[2] >= z_start and p[2] <= z_end:
+            #         points.append(p)
+
+            # if len(points) == 2: 
+            #     #print(points, chain.StartPointx_tpcAV[i],chain.EndPointx_tpcAV[i],chain.StartPointy_tpcAV[i],chain.EndPointy_tpcAV[i],chain.StartPointz_tpcAV[i],chain.EndPointz_tpcAV[i])
+            #     l = math.sqrt(sum([(a-b)**2 for a,b in zip(points[0],points[1])]))
+            #     h_theta_phi_l_geant.Fill(theta, phi, l)
+
+            # else: l = -999999
+            #print(l,l_2)
+
             for n in range(chain.ntracks_pandoraCosmic):
                 best = chain.trkpidbestplane_pandoraCosmic[n]
                 trkid = chain.trkidtruth_pandoraCosmic[3*n+best]
@@ -110,46 +146,11 @@ for entry in range(1000):
                 z1 = chain.trkstartz_pandoraCosmic[n]
                 p0 = [x1,y1,z1]
 
-                dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))            
-                if trkid == chain.TrackId[i] and dist < 35:
+                dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))     
+                if trkid == chain.TrackId[i] and dist < 32:
                     h_theta_phi_l_reco.Fill(theta, phi, l)
                     break
-
-
-    # for i in range(chain.ntracks_pandoraCosmic):
-    #     best = chain.trkpidbestplane_pandoraCosmic[i]
-    #     trkid = chain.trkidtruth_pandoraCosmic[3*i+best]
-        
-    #     #if not (chain.trkidtruth_pandoraCosmic[3*i] == chain.trkidtruth_pandoraCosmic[3*i+1] and chain.trkidtruth_pandoraCosmic[3*i] == chain.trkidtruth_pandoraCosmic[3*i+2]):
-    #     #    if chain.trkidtruth_pandoraCosmic[3*i] != -1 and chain.trkidtruth_pandoraCosmic[3*i+1] != -1 and chain.trkidtruth_pandoraCosmic[3*i+2] != -1:
-    #     #        print(chain.trkidtruth_pandoraCosmic[3*i],chain.trkidtruth_pandoraCosmic[3*i+1],chain.trkidtruth_pandoraCosmic[3*i+2])
-        
-    #     if trkid in geant_trackIds:
-    #         index = geant_trackIds.index(trkid)
-            
-    #         x1 = chain.trkstartx_pandoraCosmic[i]
-    #         y1 = chain.trkstarty_pandoraCosmic[i]
-    #         z1 = chain.trkstartz_pandoraCosmic[i]
-    #         p0 = [x1,y1,z1]
-            
-    #         p0_geant = [chain.StartPointx_drifted[index], chain.StartPointy_drifted[index], chain.StartPointz_drifted[index]]
-    #         dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))            
-            
-    #         if index not in indeces and chain.inTPCDrifted[index] == 1 and chain.process_primary[index] == 1 and dist < 35:
-
-    #             x = chain.Px[index]
-    #             y = chain.Py[index]
-    #             z = chain.Pz[index]
-    #             r = chain.P[index]
-    #             theta = math.degrees(math.acos(z/r))
-    #             phi = math.degrees(math.atan2(y,x))
-
-    #             l = (chain.StartPointx_tpcAV[index]-chain.EndPointx_tpcAV[index])**2+(chain.StartPointy_tpcAV[index]-chain.EndPointy_tpcAV[index])**2+(chain.StartPointz_tpcAV[index]-chain.EndPointz_tpcAV[index])**2
-    #             l = math.sqrt(l)
-
-    #             # h_theta_phi_l_reco.Fill(theta, phi, l)
-    #             indeces.append(index)
-                       
+                  
         
 f_theta_phi_l = TFile("plots/data/e_theta_phi_l_pandoraCosmic.root")
 e_theta_phi_l = gDirectory.Get("h_theta_phi_l_tpc")

@@ -42,12 +42,11 @@ for entry in range(entries):
     
         theta_mucs = math.acos(z/r)
         theta_mucs = math.degrees(theta_mucs)
-    
+
         phi_mucs = math.atan2(y,x)
         phi_mucs = math.degrees(phi_mucs)
-        if chain.MinD_Start[0] < 0:
-        #if phi_mucs < -75 and phi_mucs > -90 and l_mucs < 140:
-        #if theta_mucs > 75 and theta_mucs < 90 and phi_mucs < -75 and phi_mucs > -90 and l_mucs > 140 and l_mucs < 260:
+
+        if theta_mucs > 90 and theta_mucs < 105 and ((phi_mucs < -45 and phi_mucs > -60) or (phi_mucs > -90 and phi_mucs < -75)) and l_mucs > 140 and l_mucs < 260:
         
             start = [chain.MuCS_Start_TPC[0], chain.MuCS_Start_TPC[1],chain.MuCS_Start_TPC[2]]
             end_tpc = [chain.MuCS_Start[0], chain.MuCS_Start[1],chain.MuCS_Start[2]]
@@ -59,9 +58,8 @@ for entry in range(entries):
             polyline.SetPoint(1, end[0], end[1], end[2])
 
             red_lines.append(polyline)
-            
-        if theta_mucs > 90 and theta_mucs < 105 and phi_mucs > -90 and phi_mucs < -45 and l_mucs > 200 and l_mucs < 260:
-        
+
+        if theta_mucs > 75 and theta_mucs < 90 and phi_mucs < -45 and phi_mucs > -60 and l_mucs < 260 and l_mucs > 200:
             start = [chain.MuCS_Start_TPC[0], chain.MuCS_Start_TPC[1],chain.MuCS_Start_TPC[2]]
             end_tpc = [chain.MuCS_Start[0], chain.MuCS_Start[1],chain.MuCS_Start[2]]
             direction = [a_i - b_i for a_i, b_i in zip(end_tpc, start)]
@@ -74,9 +72,9 @@ for entry in range(entries):
             polyline.SetPoint(0, start[0],start[1],start[2])
             polyline.SetPoint(1, end[0], end[1], end[2])
 
-            #blue_lines.append(polyline)
+            blue_lines.append(polyline)
                      
-        if theta_mucs > 60 and theta_mucs < 75 and phi_mucs < -45 and phi_mucs > -60 and ((l_mucs > 200 and l_mucs < 260) or (l_mucs > 80 and l_mucs < 140)):
+        if theta_mucs > 75 and theta_mucs < 90 and phi_mucs < -45 and phi_mucs > -60:
         
             start = [chain.MuCS_Start_TPC[0], chain.MuCS_Start_TPC[1],chain.MuCS_Start_TPC[2]]
             end_tpc = [chain.MuCS_Start[0], chain.MuCS_Start[1],chain.MuCS_Start[2]]
