@@ -206,6 +206,9 @@ h_mucs = h_theta_phi_l_mucs.Clone()
 h_mucs.SetName("h_mucs")
 
 f = open("output/%s.txt" % position,"w")
+sys_errors = open("output/sys_errors_3d.txt","r")
+sys_errors_bins=sys_errors.readlines()
+
 for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1, h_theta_phi_l_tpc.GetNbinsY()+2):
         for k in range(1, h_theta_phi_l_tpc.GetNbinsZ()+2):
@@ -213,16 +216,18 @@ for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
                 eff = h_theta_phi_l_tpc.GetBinContent(i,j,k)/h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 mucs = h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 error = math.sqrt((eff*(1-eff))/mucs)
-                if h_theta_phi_l_tpc.GetBinContent(i,j,k) < 50: 
-                    print(i,j,k,h_theta_phi_l_tpc.GetBinContent(i,j,k),eff,error) 
-                    
+
+                sys_error = float(sys_errors_bins[(i-1)*13*9+(j-1)*9+(k-1)].split()[3])
+                if sys_error < 0: sys_error = 0
+
                 print(i,j,k,eff,error,file=f)
+
                 h_theta_phi_l_tpc.SetBinContent(i,j,k,eff)
                 h_theta_phi_l_tpc.SetBinError(i,j,k,error)
             else:
                 print(i,j,k,0,0,file=f)
 
-
+sys_errors.close()
 f.close()
 
 
@@ -243,6 +248,10 @@ h_l_sys = TH1F("h_l_sys", ";L [cm];N. Entries / %i cm" % int((500-fidvol)/bin_le
 h_theta_sys = TH1F("h_theta_sys", ";#theta [#circ];N. Entries / %i#circ" % int(90/bin_ang),bin_ang,0,180)
 h_phi_sys = TH1F("h_phi_sys", ";#phi [#circ];N. Entries / %i#circ" % int(180/bin_ang),bin_ang,-180,0)
 
+f_theta = open("output/theta_%s.txt" % position,"w")
+f_theta_sys = open("output/sys_errors_theta.txt","r")
+theta_sys=f_theta_sys.readlines()
+
 for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
 
     tpc = sum([h_tpc.GetBinContent(i,j,k) for j in range(1,h_tpc.GetNbinsY()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
@@ -250,48 +259,38 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
-        if i == 7:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.12*10/15)**2)
-            if eff+sys_error > 1:
-                sys_error = 1-eff
-        elif i == 6:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.13*10/15)**2)
-            if eff+sys_error > 1:
-                sys_error = 1-eff
-        elif i == 5:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.2*5/15)**2)
-            if eff+sys_error > 1:
-                sys_error = 1-eff
-        else:
-            sys_error = error
-        
+        sys_error = float(theta_sys[i-1].split()[1])
+        if sys_error < 0: sys_error = 0
 
+        print(i,eff,error,file=f_theta)
+        print(error,sys_error)
         h_theta.SetBinContent(i,eff)
         h_theta.SetBinError(i,error)
         h_theta_sys.SetBinContent(i,eff)
         h_theta_sys.SetBinError(i,sys_error)
-        
+    else:
+        print(i,0,0,file=f_theta)
+
+
+f_theta.close()
+f_theta_sys.close()
+
 for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):   
     tpc = sum([h_tpc.GetBinContent(j,i,k) for j in range(1,h_tpc.GetNbinsX()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
     mucs = sum([h_mucs.GetBinContent(j,i,k) for j in range(1,h_mucs.GetNbinsX()+2) for k in range(1,h_mucs.GetNbinsZ()+2)])
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
-        if i == 9:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.12*4/20)**2+(0.13*4/20)**2+(0.2*4/20)**2)
-            if eff+sys_error > 1:
-                sys_error = 1-eff
-        elif i == 8:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.12*4/20)**2+(0.13*4/20)**2)
-            if eff+sys_error > 1:
-                sys_error = 1-eff
-        else:
-            sys_error = error
+        sys_error = error
 
         h_phi.SetBinContent(i,eff)
         h_phi.SetBinError(i,error)
         h_phi_sys.SetBinContent(i,eff)
         h_phi_sys.SetBinError(i,sys_error)
+
+f_l = open("output/l_%s.txt" % position,"w")
+f_l_sys = open("output/sys_errors_l.txt","r")
+l_sys = f_l_sys.readlines()
 
 for i in range(1,h_theta_phi_l_tpc.GetNbinsZ()+2):
     tpc = sum([h_tpc.GetBinContent(j,k,i) for j in range(1,h_tpc.GetNbinsX()+2) for k in range(1,h_tpc.GetNbinsY()+2)])
@@ -299,21 +298,22 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsZ()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
-        sys_error = math.sqrt((eff*(1-eff))/mucs+(0.12*2/12)**2+(0.13*2/12)**2+(0.2/12)**2)
+        print(i,eff,error,file=f_l)
+
+        sys_error = float(l_sys[i-1].split()[1])
+        print(sys_error)
+        if sys_error < 0: sys_error = 0
+
         h_l.SetBinContent(i,eff)
         h_l.SetBinError(i,error)
         h_l_sys.SetBinContent(i,eff)
         h_l_sys.SetBinError(i,sys_error)
+    else:
+        print(i,0,0,file=f_l)
 
 
-        # if theta_angle[theta] == 90 and (phi_angle[phi] == -60 or phi_angle[phi] == -75):
-        #     sys = 0.12
-        # elif theta_angle[theta] == 75 and (phi_angle[phi] == -60 or phi_angle[phi] == -75):
-        #     sys = 0.13
-        # elif theta_angle[theta] == 60 and phi_angle[phi] == -60:
-        #     sys = 0.2
-        # else:
-        #     sys = 0
+f_l.close()
+f_l_sys.close()
 
 for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
@@ -321,10 +321,6 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
         mucs = sum([h_mucs.GetBinContent(i,j,k) for k in range(1,h_mucs.GetNbinsZ()+2)])
         if mucs and tpc:
             eff = tpc/mucs
-            if i == 7 and j >= 7 and j <= 9:
-                error = math.sqrt((eff*(1-eff))/mucs+0.087/5**2)
-            else:
-                error = math.sqrt((eff*(1-eff))/mucs)
             h_theta_phi.SetBinContent(i,j,eff)
             h_theta_phi.SetBinError(i,j,error)
 
