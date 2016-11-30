@@ -219,6 +219,9 @@ for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
                 print(i,j,k,eff,error,file=f)
                 h_theta_phi_l_tpc.SetBinContent(i,j,k,eff)
                 h_theta_phi_l_tpc.SetBinError(i,j,k,error)
+            else:
+                print(i,j,k,0,0,file=f)
+
 
 f.close()
 
@@ -248,11 +251,15 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
         if i == 7:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+0.087**2)
+            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.12*10/15)**2)
+            if eff+sys_error > 1:
+                sys_error = 1-eff
+        elif i == 6:
+            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.13*10/15)**2)
             if eff+sys_error > 1:
                 sys_error = 1-eff
         elif i == 5:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+0.087*5/15**2)
+            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.2*5/15)**2)
             if eff+sys_error > 1:
                 sys_error = 1-eff
         else:
@@ -270,12 +277,12 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
-        if i >= 7 and i < 9:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+0.087*4/20**2)
+        if i == 9:
+            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.12*4/20)**2+(0.13*4/20)**2+(0.2*4/20)**2)
             if eff+sys_error > 1:
                 sys_error = 1-eff
-        elif i == 9:
-            sys_error = math.sqrt((eff*(1-eff))/mucs+0.087*8/20**2)
+        elif i == 8:
+            sys_error = math.sqrt((eff*(1-eff))/mucs+(0.12*4/20)**2+(0.13*4/20)**2)
             if eff+sys_error > 1:
                 sys_error = 1-eff
         else:
@@ -292,13 +299,21 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsZ()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
-        sys_error = math.sqrt((eff*(1-eff))/mucs+(0.087*3/12+0.087/12)**2)
+        sys_error = math.sqrt((eff*(1-eff))/mucs+(0.12*2/12)**2+(0.13*2/12)**2+(0.2/12)**2)
         h_l.SetBinContent(i,eff)
         h_l.SetBinError(i,error)
         h_l_sys.SetBinContent(i,eff)
         h_l_sys.SetBinError(i,sys_error)
 
 
+        # if theta_angle[theta] == 90 and (phi_angle[phi] == -60 or phi_angle[phi] == -75):
+        #     sys = 0.12
+        # elif theta_angle[theta] == 75 and (phi_angle[phi] == -60 or phi_angle[phi] == -75):
+        #     sys = 0.13
+        # elif theta_angle[theta] == 60 and phi_angle[phi] == -60:
+        #     sys = 0.2
+        # else:
+        #     sys = 0
 
 for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
