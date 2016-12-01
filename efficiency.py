@@ -169,7 +169,7 @@ for entry in range(entries):
             intersect_tpc = isect_line_plane_v3(p0,p1,p_tpc,p_no_tpc)
 
             length = chain.MinD_len
-
+            
             # if tracks enter the TPC from the anode, correct the length
             if intersect_tpc[0] < 0:
                 p_no_anode = [1,0,0]

@@ -39,7 +39,7 @@ for entry in range(entries):
         y = chain.MuCS_Start_TPC[1]-chain.MuCS_Start[1]
         z = chain.MuCS_Start_TPC[2]-chain.MuCS_Start[2]
         r = math.sqrt(x**2+y**2+z**2)
-    
+
         theta_mucs = math.acos(z/r)
         theta_mucs = math.degrees(theta_mucs)
 
@@ -47,48 +47,48 @@ for entry in range(entries):
         phi_mucs = math.degrees(phi_mucs)
 
         if theta_mucs > 90 and theta_mucs < 105 and ((phi_mucs < -45 and phi_mucs > -60) or (phi_mucs > -90 and phi_mucs < -75)) and l_mucs > 140 and l_mucs < 260:
-        
+
             start = [chain.MuCS_Start_TPC[0], chain.MuCS_Start_TPC[1],chain.MuCS_Start_TPC[2]]
             end_tpc = [chain.MuCS_Start[0], chain.MuCS_Start[1],chain.MuCS_Start[2]]
             direction = [a_i - b_i for a_i, b_i in zip(end_tpc, start)]
             end = [chain.MuCS_Start_TPC[0]-direction[0], chain.MuCS_Start_TPC[1]-direction[1],chain.MuCS_Start_TPC[2]-direction[2]]
-            
+
             polyline = TPolyLine3D(2)
             polyline.SetPoint(0, start[0], start[1], start[2])
             polyline.SetPoint(1, end[0], end[1], end[2])
 
-            red_lines.append(polyline)
+            #red_lines.append(polyline)
 
-        if theta_mucs > 75 and theta_mucs < 90 and phi_mucs < -45 and phi_mucs > -60 and l_mucs < 260 and l_mucs > 200:
+        if theta_mucs > 75 and theta_mucs < 105:
             start = [chain.MuCS_Start_TPC[0], chain.MuCS_Start_TPC[1],chain.MuCS_Start_TPC[2]]
             end_tpc = [chain.MuCS_Start[0], chain.MuCS_Start[1],chain.MuCS_Start[2]]
             direction = [a_i - b_i for a_i, b_i in zip(end_tpc, start)]
             end = [chain.MuCS_Start_TPC[0]-direction[0], chain.MuCS_Start_TPC[1]-direction[1],chain.MuCS_Start_TPC[2]-direction[2]]
-            
+
             #start = [chain.Tagged_Start[0], chain.Tagged_Start[1],chain.Tagged_Start[2]]
             #end = [chain.Tagged_End[0], chain.Tagged_End[1],chain.Tagged_End[2]]
-            
+
             polyline = TPolyLine3D(2)
             polyline.SetPoint(0, start[0],start[1],start[2])
             polyline.SetPoint(1, end[0], end[1], end[2])
 
             blue_lines.append(polyline)
-                     
+
         if theta_mucs > 75 and theta_mucs < 90 and phi_mucs < -45 and phi_mucs > -60:
-        
+
             start = [chain.MuCS_Start_TPC[0], chain.MuCS_Start_TPC[1],chain.MuCS_Start_TPC[2]]
             end_tpc = [chain.MuCS_Start[0], chain.MuCS_Start[1],chain.MuCS_Start[2]]
             direction = [a_i - b_i for a_i, b_i in zip(end_tpc, start)]
             end = [chain.MuCS_Start_TPC[0]-direction[0], chain.MuCS_Start_TPC[1]-direction[1],chain.MuCS_Start_TPC[2]-direction[2]]
-            
+
             polyline = TPolyLine3D(2)
             polyline.SetPoint(0, start[0],start[1],start[2])
             polyline.SetPoint(1, end[0], end[1], end[2])
 
             #green_lines.append(polyline)
-    
-            
-    
+
+
+
 for line in red_lines:
     line.SetLineColor(kMagenta+2)
     line.Draw()
@@ -97,8 +97,8 @@ for line in blue_lines:
     line.Draw()
 for line in green_lines:
     line.SetLineColor(kGreen)
-    line.Draw()    
-    
+    line.Draw()
+
 TPC = TPolyLine3D(10)
 TPC.SetPoint(0,0,116.5,0)
 TPC.SetPoint(1,256.35,116.5,0)
