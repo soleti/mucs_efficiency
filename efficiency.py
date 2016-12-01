@@ -26,11 +26,11 @@ print(position, "dataset")
 print(algo, "algorithm")
 
 def getThetaPhiFromThetas(qxy,qyz):
-   tqxy=math.tan(qxy)
-   tqyz=math.tan(qyz)
-   theta=-math.pi/2+math.acos(((1+tqxy**-2+tqyz**-2)**-0.5))
-   phi= math.atan2(math.sin(theta)/math.tan(qyz),math.sin(theta)/math.tan(qxy))
-   return theta,phi
+    tqxy=math.tan(qxy)
+    tqyz=math.tan(qyz)
+    theta=-math.pi/2+math.acos(((1+tqxy**-2+tqyz**-2)**-0.5))
+    phi= math.atan2(math.sin(theta)/math.tan(qyz),math.sin(theta)/math.tan(qxy))
+    return theta,phi
 
 def weighted_mean(values, weights):
     return sum(v*w for v,w in zip(values,weights))/sum(weights)
@@ -127,6 +127,7 @@ for entry in range(entries):
     l_mucs = chain.MuCS_TPC_len
     x = chain.MuCS_Start_TPC[0]
     cosmic_pe = chain.flash_pe
+
 
     # MIP fit
     a = 7.316709647109627
