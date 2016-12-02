@@ -169,7 +169,7 @@ for entry in range(entries):
             intersect_tpc = isect_line_plane_v3(p0,p1,p_tpc,p_no_tpc)
 
             length = chain.MinD_len
-            
+
             # if tracks enter the TPC from the anode, correct the length
             if intersect_tpc[0] < 0:
                 p_no_anode = [1,0,0]
@@ -192,7 +192,7 @@ for entry in range(entries):
 
 eff = h_theta_phi_l_tpc.Integral()/h_theta_phi_l_mucs.Integral()
 err = math.sqrt((eff*(1-eff))/h_theta_phi_l_mucs.Integral())
-print("Integrated efficiency: %.1f +- %.1f"%(round(eff*100,1), round(err*100,1)))
+print("Integrated efficiency: %.1f +- %.1f" % (round(eff*100,1), round(err*100,1)))
 for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1, h_theta_phi_l_tpc.GetNbinsY()+2):
         for k in range(1, h_theta_phi_l_tpc.GetNbinsZ()+2):
@@ -214,6 +214,7 @@ for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1, h_theta_phi_l_tpc.GetNbinsY()+2):
         for k in range(1, h_theta_phi_l_tpc.GetNbinsZ()+2):
             if h_theta_phi_l_mucs.GetBinContent(i,j,k) and h_theta_phi_l_tpc.GetBinContent(i,j,k):
+
                 eff = h_theta_phi_l_tpc.GetBinContent(i,j,k)/h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 mucs = h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 error = math.sqrt((eff*(1-eff))/mucs)
@@ -237,9 +238,7 @@ h_theta_phi_l_tpc.GetXaxis().SetTitleOffset(1.7)
 h_theta_phi_l_tpc.GetYaxis().SetTitleOffset(1.7)
 
 h_theta_phi = TH2F("h_theta_phi",";#theta [#circ];#phi [#circ]",bin_ang,0,180,bin_ang,-180,0)
-
 h_theta_l = TH2F("h_theta_l",";#theta [#circ];L [cm]",bin_ang,0,180,bin_len,fidvol,500)
-
 h_phi_l = TH2F("h_phi_l",";#phi [#circ];L [cm]",bin_ang,-180,0,bin_len,fidvol,500)
 
 h_theta = TH1F("h_theta", ";#theta [#circ];N. Entries / %i#circ" % int(90/bin_ang),bin_ang,0,180)
@@ -289,6 +288,7 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
 
         sys_error = float(phi_sys[i-1].split()[1])
         if sys_error < 0: sys_error = 0
+
         h_phi.SetBinContent(i,eff)
         h_phi.SetBinError(i,error)
         h_phi_sys.SetBinContent(i,eff)
