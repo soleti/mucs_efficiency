@@ -70,7 +70,6 @@ with open("output/central_shift.txt") as textfile1, open("output/upstream_shift.
         phi = a[1]
         l = a[2]
 
-
         if eff[0] != 0 and eff[1] != 0 and eff[0] != 1 and eff[1] != 1:
             sig = (-eff[0]+eff[1])/math.sqrt(err[0]**2+err[1]**2+2*sys**2)
 
