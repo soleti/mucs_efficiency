@@ -27,11 +27,11 @@ bottom = [-80,0,117.5,116.5,560,660]
 bin_ang = 12
 bin_len = 8
 
-h_eff = TH1F("h_eff",";Efficiency;N. Entries / 0.03",35,0,1.5)      
+h_eff = TH1F("h_eff",";Efficiency;N. Entries / 0.03",35,0,1.5)
 
 
 files = [glob("../root_files/energy_sampling/MuCSCryMCGen/*/ana_hist.root")]
-        
+
 triggered = 0
 reco = 0
 p_bottom = [0,y_start,0]
@@ -64,28 +64,28 @@ for n,f in enumerate(tot):
             theta_data, phi_data = math.degrees(chain.theta[i]), math.degrees(chain.phi[i])
             theta_ok = theta_data > 60 and theta_data < 75
             phi_ok = phi_data > -90 and phi_data < -75
-            
+
             if chain.inTPCActive[i] and (abs(chain.pdg[i]) == 13) and chain.pathlen[i] > 140 and chain.pathlen[i] < 200 and theta_ok and phi_ok:
                 triggered+=1
                 geant_trackIds.append(chain.TrackId[i])
-                                                    
+
 
         for j in range(chain.ntracks_pandoraCosmic):
-            
+
             x1 = chain.trkstartx_pandoraCosmic[j]
             y1 = chain.trkstarty_pandoraCosmic[j]
             z1 = chain.trkstartz_pandoraCosmic[j]
 
             p0 = [x1,y1,z1]
-            
+
             best = chain.trkpidbestplane_pandoraCosmic[j]
             trkid = chain.trkidtruth_pandoraCosmic[3*j+best]
             if trkid in geant_trackIds:
                 index = geant_trackIds.index(trkid)
                 p0_geant = [chain.StartPointx_tpcAV[index], chain.StartPointy_tpcAV[index], chain.StartPointz_tpcAV[index]]
-                dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))                
+                dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))
                 theta_data, phi_data = math.degrees(chain.theta[index]),math.degrees(chain.phi[index])
-                
+
                 if dist < 35 and theta_data > 60 and theta_data < 75 and phi_data > -90 and phi_data < -75 and chain.pathlen[index] > 140 and chain.pathlen[index] < 200:
                     reco+=1
 
@@ -93,13 +93,12 @@ elements = (triggered-reco+56)*[0] + reco*[1]
 
 print(elements)
 for i in range(1000):
-    print(sum(random.sample(elements,25))/25)
     h_eff.Fill(sum(random.sample(elements,25))/25)
-    
+
 
 print(reco,triggered)
 eff = reco/(triggered+56)
-error = math.sqrt((eff*(1-eff))/triggered) 
+error = math.sqrt((eff*(1-eff))/triggered)
 print("Integrated efficiency",eff,error)
 
 
@@ -107,5 +106,5 @@ c_eff = TCanvas("c_eff")
 h_eff.Draw("ep")
 h_eff.SetMarkerStyle(20)
 h_eff.Fit("gaus")
-c_eff.Update()   
+c_eff.Update()
 input()
