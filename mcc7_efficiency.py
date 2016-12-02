@@ -16,13 +16,13 @@ z_end = 1036.8
 
 def getEff(h_num, h_den):
     h_num.Divide(h_den)
-    
+
     if type(h_num) == TH2F:
         for i in range(1,h_num.GetNbinsX()+2):
             for j in range(1,h_num.GetNbinsY()+2):
-                den = h_den.GetBinContent(i, j)         
+                den = h_den.GetBinContent(i, j)
                 eff = h_num.GetBinContent(i, j)
-                    
+
                 if den and eff <= 1:
                     error = math.sqrt((eff*(1-eff))/den)
                     h_num.SetBinError(i, j, error)
@@ -30,16 +30,16 @@ def getEff(h_num, h_den):
 
     if type(h_num) == TH1F:
         for i in range(1,h_num.GetNbinsX()+2):
-            den = h_den.GetBinContent(i)  
+            den = h_den.GetBinContent(i)
             eff = h_num.GetBinContent(i)
 
             if den and eff <=1 :
                 error = math.sqrt((eff*(1-eff))/den)
                 h_num.SetBinError(i, error)
 
-            
+
     return h_num
-            
+
 
 gStyle.SetOptStat(0)
 gStyle.SetPalette(87)
@@ -88,15 +88,15 @@ downstream_no = upstream_no
 
 print(entries)
 for entry in range(1000):
-    
+
     if entry % 10 == 0: print(entry)
-    
+
     ientry = chain.LoadTree(entry)
     nb = chain.GetEntry(entry)
 
     primaries = 0
     reco = 0
-    
+
     for i in range(chain.geant_list_size):
         x_endpoint = chain.EndPointx[i]
         y_endpoint = chain.EndPointy[i]
@@ -129,7 +129,7 @@ for entry in range(1000):
             #     if p[0] >= x_start and p[0] <= x_end and p[1] >= y_start and p[1] <= y_end and p[2] >= z_start and p[2] <= z_end:
             #         points.append(p)
 
-            # if len(points) == 2: 
+            # if len(points) == 2:
             #     #print(points, chain.StartPointx_tpcAV[i],chain.EndPointx_tpcAV[i],chain.StartPointy_tpcAV[i],chain.EndPointy_tpcAV[i],chain.StartPointz_tpcAV[i],chain.EndPointz_tpcAV[i])
             #     l = math.sqrt(sum([(a-b)**2 for a,b in zip(points[0],points[1])]))
             #     h_theta_phi_l_geant.Fill(theta, phi, l)
@@ -146,12 +146,12 @@ for entry in range(1000):
                 z1 = chain.trkstartz_pandoraCosmic[n]
                 p0 = [x1,y1,z1]
 
-                dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))     
+                dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))
                 if trkid == chain.TrackId[i] and dist < 32:
                     h_theta_phi_l_reco.Fill(theta, phi, l)
                     break
-                  
-        
+
+
 f_theta_phi_l = TFile("plots/data/e_theta_phi_l_pandoraCosmic.root")
 e_theta_phi_l = gDirectory.Get("h_theta_phi_l_tpc")
 h_reco = h_theta_phi_l_reco.Clone()
@@ -172,7 +172,7 @@ for i in range(1, h_theta_phi_l_reco.GetNbinsX()+2):
                     h_geant.SetBinError(i,j,k,0)
                 h_theta_phi_l_reco.SetBinContent(i,j,k,eff)
                 h_theta_phi_l_reco.SetBinError(i,j,k,error)
-    
+
 overall_eff = h_reco.Integral()/h_geant.Integral()
 overall_eff_err = math.sqrt((overall_eff*(1-overall_eff))/h_geant.Integral())
 print("Overall efficiency: %.1f%% +- %.1f%%" % (round(overall_eff*100,1),round(overall_eff_err*100,1)))
@@ -187,7 +187,7 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
             error = math.sqrt((eff*(1-eff))/geant)
             h_theta_phi_reco.SetBinContent(i,j,eff)
             h_theta_phi_reco.SetBinError(i,j,error)
-            
+
 h_theta_phi_reco.Draw("colz texte")
 h_theta_phi_reco.SaveAs("plots/mc/theta_phi_mcc7.root")
 c_theta_phi.Update()
@@ -221,31 +221,31 @@ h_phi_l_reco.SaveAs("plots/mc/phi_l_mcc7.root")
 c_phi_l.Update()
 
 c_l = TCanvas("c_l")
-for i in range(1,h_theta_phi_l_reco.GetNbinsZ()+2): 
+for i in range(1,h_theta_phi_l_reco.GetNbinsZ()+2):
     reco = sum([h_reco.GetBinContent(j,k,i) for j in range(1,h_reco.GetNbinsX()+2) for k in range(1,h_reco.GetNbinsY()+2)])
     geant = sum([h_geant.GetBinContent(j,k,i) for j in range(1,h_geant.GetNbinsX()+2) for k in range(1,h_geant.GetNbinsY()+2)])
-    
+
     if reco and geant:
         eff = reco/geant
         error = math.sqrt((eff*(1-eff))/geant)
         h_l_reco.SetBinContent(i,eff)
         h_l_reco.SetBinError(i,error)
         h_l_reco.SetLineColor(kRed+1)
-        
+
 h_l_reco.Draw("hist")
 h_l_reco.GetYaxis().SetRangeUser(0.001,1.05)
 h_l_reco_clone = h_l_reco.Clone()
 h_l_reco_clone.SetFillStyle(3002)
 h_l_reco_clone.SetFillColor(kRed+1)
 h_l_reco_clone.Draw("e2same")
-h_l_reco_clone.SaveAs("plots/mc/l_mcc7.root")     
+h_l_reco_clone.SaveAs("plots/mc/l_mcc7.root")
 c_l.Update()
 
 c_theta = TCanvas("c_theta")
-for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2): 
+for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
     reco = sum([h_reco.GetBinContent(i,j,k) for j in range(1,h_reco.GetNbinsY()+2) for k in range(1,h_reco.GetNbinsZ()+2)])
     geant = sum([h_geant.GetBinContent(i,j,k) for j in range(1,h_geant.GetNbinsY()+2) for k in range(1,h_geant.GetNbinsZ()+2)])
-    
+
     if reco and geant:
         eff = reco/geant
         error = math.sqrt((eff*(1-eff))/geant)
@@ -265,10 +265,10 @@ h_theta_reco_clone.SaveAs("plots/mc/theta_mcc7.root")
 c_theta.Update()
 
 c_phi = TCanvas("c_phi")
-for i in range(1,h_theta_phi_l_reco.GetNbinsY()+2): 
+for i in range(1,h_theta_phi_l_reco.GetNbinsY()+2):
     reco = sum([h_reco.GetBinContent(j,i,k) for j in range(1,h_reco.GetNbinsX()+2) for k in range(1,h_reco.GetNbinsZ()+2)])
     geant = sum([h_geant.GetBinContent(j,i,k) for j in range(1,h_geant.GetNbinsX()+2) for k in range(1,h_geant.GetNbinsZ()+2)])
-    
+
     if reco and geant:
         eff = reco/geant
         error = math.sqrt((eff*(1-eff))/geant)
