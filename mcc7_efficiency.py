@@ -115,27 +115,7 @@ for entry in range(1000):
 
             p0_geant = [chain.StartPointx_drifted[i], chain.StartPointy_drifted[i], chain.StartPointz_drifted[i]]
 
-            # p0_geant = [chain.StartPointx_tpcAV[i], chain.StartPointy_tpcAV[i], chain.StartPointz_tpcAV[i]]
-            # p1_geant = [chain.StartPointx_tpcAV[i]+x, chain.StartPointy_tpcAV[i]+y, chain.StartPointz_tpcAV[i]+z]
-            # anode_p = isect_line_plane_v3(p0_geant, p1_geant, anode_plane, anode_no)
-            # cathode_p = isect_line_plane_v3(p0_geant, p1_geant, cathode_plane, cathode_no)
-            # upstream_p = isect_line_plane_v3(p0_geant, p1_geant, upstream_plane, upstream_no)
-            # downstream_p = isect_line_plane_v3(p0_geant, p1_geant, downstream_plane, downstream_no)
-            # top_p = isect_line_plane_v3(p0_geant, p1_geant, top_plane, top_no)
-            # bottom_p = isect_line_plane_v3(p0_geant, p1_geant, bottom_plane, bottom_no)
-            # planes = [anode_p, cathode_p, upstream_p, downstream_p, top_p, bottom_p]
-            # points = []
-            # for p in planes:
-            #     if p[0] >= x_start and p[0] <= x_end and p[1] >= y_start and p[1] <= y_end and p[2] >= z_start and p[2] <= z_end:
-            #         points.append(p)
 
-            # if len(points) == 2:
-            #     #print(points, chain.StartPointx_tpcAV[i],chain.EndPointx_tpcAV[i],chain.StartPointy_tpcAV[i],chain.EndPointy_tpcAV[i],chain.StartPointz_tpcAV[i],chain.EndPointz_tpcAV[i])
-            #     l = math.sqrt(sum([(a-b)**2 for a,b in zip(points[0],points[1])]))
-            #     h_theta_phi_l_geant.Fill(theta, phi, l)
-
-            # else: l = -999999
-            #print(l,l_2)
 
             for n in range(chain.ntracks_pandoraCosmic):
                 best = chain.trkpidbestplane_pandoraCosmic[n]
@@ -144,10 +124,39 @@ for entry in range(1000):
                 x1 = chain.trkstartx_pandoraCosmic[n]
                 y1 = chain.trkstarty_pandoraCosmic[n]
                 z1 = chain.trkstartz_pandoraCosmic[n]
-                p0 = [x1,y1,z1]
+                # x_dir = chain.trkstartdcosx_pandoraCosmic[n]
+                # y_dir = chain.trkstartdcosy_pandoraCosmic[n]
+                # z_dir = chain.trkstartdcosz_pandoraCosmic[n]
+                # p_no_tpc = [0,1,0]
+                # p_tpc = [0,y_end,0]
+                #
+                #
 
+                p0 = [x1,y1,z1]
+                #p1 = [x1+x_dir,y1+y_dir,z1+z_dir]
+                # intersect_tpc = isect_line_plane_v3(p0,p1,p_tpc,p_no_tpc)
+                # anode_p = isect_line_plane_v3(p0, p1, anode_plane, anode_no)
+                # cathode_p = isect_line_plane_v3(p0, p1, cathode_plane, cathode_no)
+                # upstream_p = isect_line_plane_v3(p0, p1, upstream_plane, upstream_no)
+                # downstream_p = isect_line_plane_v3(p0, p1, downstream_plane, downstream_no)
+                # top_p = isect_line_plane_v3(p0, p1, top_plane, top_no)
+                # bottom_p = isect_line_plane_v3(p0, p1, bottom_plane, bottom_no)
+                #
+                # min_dist = 9999
+                # closest_point = []
+                # points = [anode_p, cathode_p, upstream_p, downstream_p, top_p, bottom_p]
+                # for point in points:
+                #
+                #     if point:
+                #         dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,point)]))
+                #         #print(point[0],point[1],point[2])
+                #         if point[0] >= x_start and point[0] <= x_end and point[1] >= y_start and point[1] <= y_end and point[2] >= z_start and point[2] <= z_end:
+                #             min_dist = dist
+                #             closest_point = point
+                #
                 dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))
-                if trkid == chain.TrackId[i] and dist < 32:
+                dist2 = math.sqrt((p0_geant[0]-p0[0])**2+(p0_geant[1]-p0[1])**2)
+                if trkid == chain.TrackId[i] and dist2 < 32:
                     h_theta_phi_l_reco.Fill(theta, phi, l)
                     break
 
