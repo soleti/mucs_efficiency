@@ -95,9 +95,9 @@ if position == "upstream_shift":
     chain.Add("../mucs_merged/MuCSRun7702_Group182_MergedTree.Root")
     chain.Add("../mucs_merged/MuCSRun7703_Group183_MergedTree.Root")
 if position == "all":
+    chain.Add("../mucs_merged/CORSIKA.root")
     chain.Add("../mucs_merged/MuCSRun7347_Group181_MergedTree.Root")
     chain.Add("../mucs_merged/MuCSRun7348_Group181_MergedTree.Root")
-    chain.Add("../mucs_merged/CORSIKA.root")
     chain.Add("../mucs_merged/MuCSRun7702_Group182_MergedTree.Root")
     chain.Add("../mucs_merged/MuCSRun7703_Group183_MergedTree.Root")
 
@@ -115,8 +115,7 @@ h_theta_phi_l_tpc = TH3F("h_theta_phi_l_tpc",";#theta [#circ]; #phi [#circ]; L [
 h_theta_phi_l_mucs = TH3F("h_theta_phi_l_mucs",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 
 entries = chain.GetEntries()
-triggered = 0
-reco = 0
+
 print(entries)
 
 for entry in range(entries):
@@ -128,27 +127,15 @@ for entry in range(entries):
     x = chain.MuCS_Start_TPC[0]
     cosmic_pe = chain.flash_pe
 
-
     # MIP fit
     a = 7.316709647109627
     b = -0.0979316568443668
     c = 0.0005124018261413519
     d = -1.020167027369585e-06
 
-    if data:
-        mip = l_mucs > 0 and cosmic_pe > 0# and cosmic_pe/l_mucs > a + b*x + c*x**2 +d*x**3 - 0.75
-        xy_tpc = math.degrees(chain.MinD_theta_xy)
-        yz_tpc = math.degrees(chain.MinD_theta_yz)
-    else:
-        mip = l_mucs > 0 and chain.MCflash_pe > 0
-        xy_tpc = math.degrees(chain.MCTagged_theta_xy)
-        yz_tpc = math.degrees(chain.MCTagged_theta_yz)
-        l_tpc = chain.MCTagged_len
+    mip = l_mucs > 0 and cosmic_pe > 0# and cosmic_pe/l_mucs > a + b*x + c*x**2 +d*x**3 - 0.75
 
-    xy_mucs = math.degrees(chain.MuCS_theta_xy)
-    yz_mucs = math.degrees(chain.MuCS_theta_yz)
-
-    if chain.MuCS_NHitsX < 8 and chain.MuCS_NHitsZ < 8 and mip:
+    if chain.MuCS_NHitsX < 8 and chain.MuCS_NHitsZ < 8 and mip and chain.evt_number != 17453:
         x = chain.MuCS_Start_TPC[0]-chain.MuCS_Start[0]
         y = chain.MuCS_Start_TPC[1]-chain.MuCS_Start[1]
         z = chain.MuCS_Start_TPC[2]-chain.MuCS_Start[2]
@@ -160,7 +147,6 @@ for entry in range(entries):
         phi_mucs = math.atan2(y,x)
         phi_mucs = math.degrees(phi_mucs)
 
-
         if chain.MinD_len < 320 and phi_mucs < -45:
             p_no_tpc = [0,1,0]
             p_tpc = [0,y_end,0]
@@ -170,25 +156,18 @@ for entry in range(entries):
 
             length = chain.MinD_len
 
-            # if tracks enter the TPC from the anode, correct the length
-            if intersect_tpc[0] < 0:
-                p_no_anode = [1,0,0]
-                p_anode = [0,0,0]
-                intersect_anode = isect_line_plane_v3(p0,p1,p_anode,p_no_anode)
-                if intersect_anode:
-                    length = math.sqrt(sum([(a-b)**2 for a,b in zip(intersect_anode,p1)]))
-
             through_x = intersect_tpc[0] > x_start and intersect_tpc[0] < x_end
             through_z = intersect_tpc[2] > z_start and intersect_tpc[2] < z_end
             through_tpc = through_x and through_z
 
             if through_tpc:
                 h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, length)
-
-                if xy_tpc and (chain.MinD_dist < 35 or not data):
-                    reco += 1
-
+                dist = math.sqrt((chain.MuCS_Start_TPC[0]-chain.MinD_Start[0])**2+(chain.MuCS_Start_TPC[1]-chain.MinD_Start[1])**2)
+                dist2 = math.sqrt((chain.MuCS_Start_TPC[0]-chain.MinD_Start[0])**2+(chain.MuCS_Start_TPC[2]-chain.MinD_Start[2])**2)
+                if dist < 32:
                     h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, length)
+
+
 
 eff = h_theta_phi_l_tpc.Integral()/h_theta_phi_l_mucs.Integral()
 err = math.sqrt((eff*(1-eff))/h_theta_phi_l_mucs.Integral())
@@ -259,8 +238,7 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
-        sys_error = float(theta_sys[i-1].split()[1])
-        if sys_error < 0: sys_error = 0
+        sys_error = abs(float(theta_sys[i-1].split()[1]))
 
         print(i,eff,error,file=f_theta)
         h_theta.SetBinContent(i,eff)
@@ -284,10 +262,10 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
+
         print(i,eff,error,file=f_phi)
 
-        sys_error = float(phi_sys[i-1].split()[1])
-        if sys_error < 0: sys_error = 0
+        sys_error = abs(float(phi_sys[i-1].split()[1]))
 
         h_phi.SetBinContent(i,eff)
         h_phi.SetBinError(i,error)
@@ -307,10 +285,10 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsZ()+2):
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
+
         print(i,eff,error,file=f_l)
 
-        sys_error = float(l_sys[i-1].split()[1])
-        if sys_error < 0: sys_error = 0
+        sys_error = abs(float(l_sys[i-1].split()[1]))
 
         h_l.SetBinContent(i,eff)
         h_l.SetBinError(i,error)
@@ -337,8 +315,8 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
             error = math.sqrt((eff*(1-eff))/mucs)
 
             print(i,eff,error,file=f_theta_phi)
+
             sys_error = float(theta_phi_sys[(i-1)*13+(j-1)].split()[1])
-            if sys_error < 0: sys_error = 0
 
             h_theta_phi.SetBinContent(i,j,eff)
             h_theta_phi.SetBinError(i,j,math.sqrt(sys_error**2+error**2))
@@ -478,6 +456,5 @@ h_theta_phi_l_tpc.GetXaxis().SetNdivisions(5,0,5)
 h_theta_phi_l_tpc.SaveAs("plots/%s/e_theta_phi_l_%s.root" % ("data" if data else "mc", algo))
 
 c_theta_phi_l.Update()
-
 
 input()
