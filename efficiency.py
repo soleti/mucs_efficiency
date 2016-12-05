@@ -2,6 +2,7 @@
 
 import os, sys
 import math
+from ROOT import TEfficiency
 from ROOT import TPad, gDirectory, TChain, TFile, TH1F, TH2F, TH3F, gStyle, TCanvas, gPad, TPaveText, kGray
 from geomUtil import isect_line_plane_v3
 
@@ -83,23 +84,23 @@ chain = TChain("events_"+algo)
 #downstream_shift == 34
 
 if position == "central_centre":
-    chain.Add("../mucs_merged/MuCSRun7263_Group180_MergedTree.Root")
-    chain.Add("../mucs_merged/MuCSRun7264_Group180_MergedTree.Root")
-    chain.Add("../mucs_merged/MuCSRun7265_Group180_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7263_Group180_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7264_Group180_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7265_Group180_MergedTree.Root")
 if position == "downstream_shift":
-    chain.Add("../mucs_merged/MuCSRun7347_Group181_MergedTree.Root")
-    chain.Add("../mucs_merged/MuCSRun7348_Group181_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7347_Group181_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7348_Group181_MergedTree.Root")
 if position == "central_shift":
-    chain.Add("../mucs_merged/CORSIKA.root")
+    chain.Add("../root_files/CORSIKA.root")
 if position == "upstream_shift":
-    chain.Add("../mucs_merged/MuCSRun7702_Group182_MergedTree.Root")
-    chain.Add("../mucs_merged/MuCSRun7703_Group183_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7702_Group182_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7703_Group183_MergedTree.Root")
 if position == "all":
-    chain.Add("../mucs_merged/CORSIKA.root")
-    chain.Add("../mucs_merged/MuCSRun7347_Group181_MergedTree.Root")
-    chain.Add("../mucs_merged/MuCSRun7348_Group181_MergedTree.Root")
-    chain.Add("../mucs_merged/MuCSRun7702_Group182_MergedTree.Root")
-    chain.Add("../mucs_merged/MuCSRun7703_Group183_MergedTree.Root")
+    chain.Add("../root_files/CORSIKA.root")
+    chain.Add("../root_files/MuCSRun7347_Group181_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7348_Group181_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7702_Group182_MergedTree.Root")
+    chain.Add("../root_files/MuCSRun7703_Group183_MergedTree.Root")
 
 fidvol = 20
 x_start = 0
@@ -168,7 +169,6 @@ for entry in range(entries):
                     h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, length)
 
 
-
 eff = h_theta_phi_l_tpc.Integral()/h_theta_phi_l_mucs.Integral()
 err = math.sqrt((eff*(1-eff))/h_theta_phi_l_mucs.Integral())
 print("Integrated efficiency: %.1f +- %.1f" % (round(eff*100,1), round(err*100,1)))
@@ -230,12 +230,18 @@ h_phi_sys = TH1F("h_phi_sys", ";#phi [#circ];N. Entries / %i#circ" % int(180/bin
 f_theta = open("output/theta_%s.txt" % position,"w")
 f_theta_sys = open("output/sys_errors_theta.txt","r")
 theta_sys=f_theta_sys.readlines()
+h_theta_tpc = TH1F("h_theta_tpc","",bin_ang,0,180)
+h_theta_mucs = TH1F("h_theta_mucs","",bin_ang,0,180)
 
 for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
 
     tpc = sum([h_tpc.GetBinContent(i,j,k) for j in range(1,h_tpc.GetNbinsY()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
     mucs = sum([h_mucs.GetBinContent(i,j,k) for j in range(1,h_mucs.GetNbinsY()+2) for k in range(1,h_mucs.GetNbinsZ()+2)])
+
+    print(tpc,mucs)
     if tpc and mucs:
+        h_theta_tpc.SetBinContent(i,tpc)
+        h_theta_mucs.SetBinContent(i,mucs)
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
         sys_error = abs(float(theta_sys[i-1].split()[1]))
@@ -248,7 +254,9 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
     else:
         print(i,0,0,file=f_theta)
 
-
+e_theta = TEfficiency(h_theta_tpc,h_theta_mucs)
+e_theta.SetStatisticOption(TEfficiency.kBBayesian)
+e_theta.SetConfidenceLevel(0.683)
 f_theta.close()
 f_theta_sys.close()
 
@@ -259,6 +267,7 @@ phi_sys = f_phi_sys.readlines()
 for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
     tpc = sum([h_tpc.GetBinContent(j,i,k) for j in range(1,h_tpc.GetNbinsX()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
     mucs = sum([h_mucs.GetBinContent(j,i,k) for j in range(1,h_mucs.GetNbinsX()+2) for k in range(1,h_mucs.GetNbinsZ()+2)])
+
     if tpc and mucs:
         eff = tpc/mucs
         error = math.sqrt((eff*(1-eff))/mucs)
@@ -273,7 +282,6 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
         h_phi_sys.SetBinError(i,math.sqrt(sys_error**2+error**2))
     else:
         print(i,0,0,file=f_phi)
-
 
 f_l = open("output/l_%s.txt" % position,"w")
 f_l_sys = open("output/sys_errors_l.txt","r")
@@ -417,30 +425,30 @@ c_phi_l.Update()
 c_theta = TCanvas("c_theta","theta")
 c_theta.cd()
 
-h_theta.Draw()
-h_theta.GetYaxis().SetRangeUser(0,1)
+h_theta_sys.Draw()
+h_theta_sys.GetYaxis().SetRangeUser(0,1)
 h_theta.SetMarkerStyle(20)
 h_theta.SaveAs("plots/%s/e_theta_%s.root" % ("data" if data else "mc", algo))
 h_theta_sys.SaveAs("plots/%s/e_theta_sys_%s.root" % ("data" if data else "mc", algo))
-
+e_theta.Draw("P SAME")
+e_theta.SaveAs("plots/data/eff_theta_pandoraCosmic.root")
 c_theta.Update()
 
 c_phi = TCanvas("c_phi","phi")
 c_phi.cd()
 
-h_phi.Draw()
-h_phi.GetYaxis().SetRangeUser(0,1)
+h_phi_sys.Draw()
+h_phi_sys.GetYaxis().SetRangeUser(0,1)
 h_phi.SetMarkerStyle(20)
 h_phi.SaveAs("plots/%s/e_phi_%s.root" % ("data" if data else "mc", algo))
 h_phi_sys.SaveAs("plots/%s/e_phi_sys_%s.root" % ("data" if data else "mc", algo))
-
 c_phi.Update()
 
 c_l = TCanvas("c_l","l")
 c_l.cd()
 
-h_l.Draw("p")
-h_l.GetYaxis().SetRangeUser(0,1)
+h_l_sys.Draw("p")
+h_l_sys.GetYaxis().SetRangeUser(0,1)
 h_l.SetMarkerStyle(20)
 h_l.SaveAs("plots/%s/e_l_%s.root" % ("data" if data else "mc", algo))
 h_l_sys.SaveAs("plots/%s/e_l_sys_%s.root" % ("data" if data else "mc", algo))
