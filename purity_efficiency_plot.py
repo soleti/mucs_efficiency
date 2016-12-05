@@ -14,17 +14,17 @@ purity_err_list = []
 tolerance_list = []
 product = []
 product_err = []
-f = open("purity.txt")
+f = open("output/purity.txt")
 for line in f:
     tolerance, eff, eff_err, purity, purity_err = line.split()
     tolerance_list.append(float(tolerance))
-    eff_list.append(float(eff))
+    eff_list.append(float(eff)-2.66)
     eff_err_list.append(float(eff_err))
     purity_list.append(float(purity))
     purity_err_list.append(float(purity_err))
-    product.append(float(purity)*float(eff)/100)
+    product.append(float(purity)*(float(eff)-2.66)/100)
     product_err.append(100*product_error(float(purity)/100,float(eff)/100,float(purity_err)/100,float(eff_err)/100))
-    
+
     print(float(purity)*float(eff))
 
 no_err = array([0]*len(eff_list))
@@ -53,7 +53,7 @@ g_purity.Draw("PL")
 g_purity.SetMarkerStyle(21)
 g_purity.SetLineColor(kBlue+1)
 g_purity.SetLineWidth(2)
-reco_eff_line = TLine(6,98.96,54,98.96)
+reco_eff_line = TLine(6,98.96-2.66,54,98.96-2.66)
 reco_eff_line.SetLineColor(1)
 reco_eff_line.SetLineStyle(2)
 reco_eff_line.SetLineWidth(2)
