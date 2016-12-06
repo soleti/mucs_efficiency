@@ -220,11 +220,11 @@ h_theta_phi = TH2F("h_theta_phi",";#theta [#circ];#phi [#circ]",bin_ang,0,180,bi
 h_theta_l = TH2F("h_theta_l",";#theta [#circ];L [cm]",bin_ang,0,180,bin_len,fidvol,500)
 h_phi_l = TH2F("h_phi_l",";#phi [#circ];L [cm]",bin_ang,-180,0,bin_len,fidvol,500)
 
-h_theta = TH1F("h_theta", ";#theta [#circ];N. Entries / %i#circ" % int(90/bin_ang),bin_ang,0,180)
+h_theta = TH1F("h_theta", ";#theta [#circ];N. Entries / %i#circ" % int(180/bin_ang),bin_ang,0,180)
 h_phi = TH1F("h_phi", ";#phi [#circ];N. Entries / %i#circ" % int(180/bin_ang),bin_ang,-180,0)
 h_l = TH1F("h_l", ";L [cm];N. Entries / %i cm" % int((500-fidvol)/bin_len), bin_len, fidvol, 500)
 h_l_sys = TH1F("h_l_sys", ";L [cm];N. Entries / %i cm" % int((500-fidvol)/bin_len), bin_len, fidvol, 500)
-h_theta_sys = TH1F("h_theta_sys", ";#theta [#circ];N. Entries / %i#circ" % int(90/bin_ang),bin_ang,0,180)
+h_theta_sys = TH1F("h_theta_sys", ";#theta [#circ];N. Entries / %i#circ" % int(180/bin_ang),bin_ang,0,180)
 h_phi_sys = TH1F("h_phi_sys", ";#phi [#circ];N. Entries / %i#circ" % int(180/bin_ang),bin_ang,-180,0)
 
 f_theta = open("output/theta_%s.txt" % position,"w")
