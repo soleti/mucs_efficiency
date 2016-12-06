@@ -61,11 +61,11 @@ h_theta_l_reco = TH2F("h_theta_l_reco",";#theta [#circ];L [cm]",bin_ang,0,180,bi
 h_phi_l_geant = TH2F("h_phi_l_geant",";#phi [#circ];L [cm]",bin_ang,-180,0,bin_len,fidvol,500)
 h_phi_l_reco = TH2F("h_phi_l_reco",";#phi [#circ];L [cm]",bin_ang,-180,0,bin_len,fidvol,500)
 
-h_theta_reco = TH1F("h_theta_reco",";#theta [#circ]; N. Entries / 10#circ",bin_ang,0,180)
-h_theta_geant = TH1F("h_theta_geant",";#theta [#circ]; N. Entries / 10#circ",bin_ang,0,180)
+h_theta_reco = TH1F("h_theta_reco",";#theta [#circ]; N. Entries / 15#circ",bin_ang,0,180)
+h_theta_geant = TH1F("h_theta_geant",";#theta [#circ]; N. Entries / 15#circ",bin_ang,0,180)
 
-h_phi_reco = TH1F("h_phi_reco",";#phi [#circ]; N. Entries / 20#circ",bin_ang,-180,0)
-h_phi_geant = TH1F("h_phi_geant",";#phi [#circ]; N. Entries / 20#circ",bin_ang,-180,0)
+h_phi_reco = TH1F("h_phi_reco",";#phi [#circ]; N. Entries / 15#circ",bin_ang,-180,0)
+h_phi_geant = TH1F("h_phi_geant",";#phi [#circ]; N. Entries / 15#circ",bin_ang,-180,0)
 
 h_l_geant = TH1F("h_l_geant",";L [cm]; N. Entries / 80 cm",bin_len,fidvol,500)
 h_l_reco = TH1F("h_l_reco",";L [cm]; N. Entries / 80 cm",bin_len,fidvol,500)
