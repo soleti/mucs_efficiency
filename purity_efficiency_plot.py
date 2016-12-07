@@ -42,7 +42,7 @@ g_product.GetXaxis().SetTitle("Tolerance [cm]")
 g_product.GetYaxis().SetTitle("[%]")
 g_product.GetYaxis().SetRangeUser(94, 100)
 
-g_product.SetMarkerStyle(21)
+g_product.SetMarkerStyle(22)
 g_product.SetLineColor(kGreen+1)
 g_product.SetLineWidth(2)
 g_eff.Draw("PL")
@@ -62,11 +62,11 @@ reco_eff_line.Draw()
 l = TLegend(0.46,0.16,0.89,0.33)
 l.SetBorderSize(0)
 l.SetShadowColor(0)
-l.AddEntry(g_eff,"Efficiency", "lp")
+l.AddEntry(g_eff,"Efficiency #epsilon", "lp")
 l.AddEntry(g_purity,"Purity", "lp")
 l.AddEntry(g_product,"Efficiency x Purity", "lp")
 
-l.AddEntry(reco_eff_line,"Monte Carlo reco. efficiency", "l")
+l.AddEntry(reco_eff_line,"Ideal efficiency", "l")
 
 l.Draw()
 
