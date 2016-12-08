@@ -192,15 +192,13 @@ sys_errors_bins=sys_errors.readlines()
 for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1, h_theta_phi_l_tpc.GetNbinsY()+2):
         for k in range(1, h_theta_phi_l_tpc.GetNbinsZ()+2):
-            bin1 = (k == 5 and i == 6 and j == 7)
-            bin2 = (k == 5 and i == 7 and j == 7)
-
-            if h_theta_phi_l_mucs.GetBinContent(i,j,k) and h_theta_phi_l_tpc.GetBinContent(i,j,k) and not bin1 and not bin2:
+            if h_theta_phi_l_mucs.GetBinContent(i,j,k) and h_theta_phi_l_tpc.GetBinContent(i,j,k):
 
                 eff = h_theta_phi_l_tpc.GetBinContent(i,j,k)/h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 mucs = h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 error = math.sqrt((eff*(1-eff))/mucs)
-
+                if h_theta_phi_l_mucs.GetBinContent(i,j,k) < 50:
+                    print(i,j,k,eff,error,h_theta_phi_l_mucs.GetBinContent(i,j,k))
                 sys_error = float(sys_errors_bins[(i-1)*13*9+(j-1)*9+(k-1)].split()[3])
                 if sys_error < 0: sys_error = 0
 
