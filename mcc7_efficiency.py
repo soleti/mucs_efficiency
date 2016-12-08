@@ -73,6 +73,8 @@ h_l_reco = TH1F("h_l_reco",";L [cm]; N. Entries / 80 cm",bin_len,fidvol,500)
 h_theta_phi_l_reco = TH3F("h_theta_phi_l_reco",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 h_theta_phi_l_geant = TH3F("h_theta_phi_l_geant",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 
+h_dist = TH1F("h_dist",";Distance [cm]; N. Entries / 2 cm", 25, 0, 50)
+
 anode_plane = [0,0,0]
 anode_no = [1,0,0]
 cathode_plane = [x_end,0,0]
@@ -87,7 +89,7 @@ downstream_plane = [0,0,z_end]
 downstream_no = upstream_no
 
 print(entries)
-for entry in range(1000):
+for entry in range(200):
 
     if entry % 10 == 0: print(entry)
 
@@ -156,9 +158,11 @@ for entry in range(1000):
                 #
                 dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))
                 dist2 = math.sqrt((p0_geant[0]-p0[0])**2+(p0_geant[1]-p0[1])**2)
-                if trkid == chain.TrackId[i] and dist2 < 32:
-                    h_theta_phi_l_reco.Fill(theta, phi, l)
-                    break
+                if trkid == chain.TrackId[i]:
+                    h_dist.Fill(dist)
+                    if dist2 < 32:
+                        h_theta_phi_l_reco.Fill(theta, phi, l)
+                        break
 
 
 f_theta_phi_l = TFile("plots/data/e_theta_phi_l_pandoraCosmic.root")
@@ -295,4 +299,21 @@ h_phi_reco_clone.Draw("e2same")
 h_phi_reco_clone.SaveAs("plots/mc/phi_mcc7.root")
 
 c_phi.Update()
+
+c_dist = TCanvas("c_dist")
+h_dist.Draw()
+c_dist.Update()
+
+gStyle.SetCanvasPreferGL(1)
+
+c_3d = TCanvas("c_3d","3d")
+h_theta_phi_l_reco.Draw("glbox")
+h_theta_phi_l_reco.GetZaxis().SetTitleOffset(1.7)
+h_theta_phi_l_reco.GetXaxis().SetTitleOffset(1.7)
+h_theta_phi_l_reco.GetYaxis().SetTitleOffset(1.7)
+h_theta_phi_l_reco.GetXaxis().SetRangeUser(60,120)
+h_theta_phi_l_reco.GetYaxis().SetRangeUser(-90,-45)
+h_theta_phi_l_reco.GetZaxis().SetRangeUser(20,320)
+
+c_3d.Update()
 input()
