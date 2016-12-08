@@ -192,7 +192,10 @@ sys_errors_bins=sys_errors.readlines()
 for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1, h_theta_phi_l_tpc.GetNbinsY()+2):
         for k in range(1, h_theta_phi_l_tpc.GetNbinsZ()+2):
-            if h_theta_phi_l_mucs.GetBinContent(i,j,k) and h_theta_phi_l_tpc.GetBinContent(i,j,k):
+            bin1 = (k == 5 and i == 6 and j == 7)
+            bin2 = (k == 5 and i == 7 and j == 7)
+
+            if h_theta_phi_l_mucs.GetBinContent(i,j,k) and h_theta_phi_l_tpc.GetBinContent(i,j,k) and not bin1 and not bin2:
 
                 eff = h_theta_phi_l_tpc.GetBinContent(i,j,k)/h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 mucs = h_theta_phi_l_mucs.GetBinContent(i,j,k)
@@ -205,7 +208,10 @@ for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
 
                 h_theta_phi_l_tpc.SetBinContent(i,j,k,eff)
                 h_theta_phi_l_tpc.SetBinError(i,j,k,error)
+
             else:
+                h_theta_phi_l_tpc.SetBinContent(i,j,k,0)
+                h_theta_phi_l_tpc.SetBinError(i,j,k,0)
                 print(i,j,k,0,0,file=f)
 
 sys_errors.close()
@@ -455,12 +461,14 @@ h_l_sys.SaveAs("plots/%s/e_l_sys_%s.root" % ("data" if data else "mc", algo))
 c_l.Update()
 
 gStyle.SetCanvasPreferGL(1)
-c_theta_phi_l = TCanvas("c_theta_phi_l","theta_phi_l",500,500)
-
+c_theta_phi_l = TCanvas("c_theta_phi_l","theta_phi_l")
+h_theta_phi_l_tpc.GetZaxis().SetTitleOffset(1.7)
+h_theta_phi_l_tpc.GetXaxis().SetTitleOffset(1.7)
+h_theta_phi_l_tpc.GetYaxis().SetTitleOffset(1.7)
+h_theta_phi_l_tpc.GetXaxis().SetRangeUser(60,120)
+h_theta_phi_l_tpc.GetYaxis().SetRangeUser(-90,-45)
+h_theta_phi_l_tpc.GetZaxis().SetRangeUser(20,320)
 h_theta_phi_l_tpc.Draw("glbox")
-h_theta_phi_l_tpc.GetZaxis().SetRangeUser(20,370)
-h_theta_phi_l_tpc.GetXaxis().SetNdivisions(5,0,5)
-
 h_theta_phi_l_tpc.SaveAs("plots/%s/e_theta_phi_l_%s.root" % ("data" if data else "mc", algo))
 
 c_theta_phi_l.Update()
