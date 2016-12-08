@@ -67,7 +67,7 @@ def draw_canvas_1d(name):
     h_mc.SetFillColor(kRed+1)
     h_mc.SetFillStyle(0)
     h_mc.GetYaxis().SetTitle("Efficiency")
-
+    h_mc.GetYaxis().SetRangeUser(0.61,1.04)
     f = TFile("plots/data/e_%s_pandoraCosmic.root" % name)
     h = gDirectory.Get("h_%s" % name)
     h.SetMarkerStyle(20)
@@ -125,8 +125,20 @@ def draw_canvas_2d(name):
     h.GetZaxis().SetRangeUser(0.5,1.5)
     h.GetZaxis().SetTitle("Data/Monte Carlo")
     h.GetZaxis().RotateTitle()
-    h.GetXaxis().SetRangeUser(60,120)
-    h.GetYaxis().SetRangeUser(-90,-45)
+
+    x_minbin = h.FindFirstBinAbove(0,1)
+    low_x = h.GetXaxis().GetBinLowEdge(x_minbin)
+    x_maxbin = h.FindLastBinAbove(0,1)
+    high_x = h.GetXaxis().GetBinUpEdge(x_maxbin)
+
+    y_minbin = h.FindFirstBinAbove(0,2)
+    low_y = h.GetYaxis().GetBinLowEdge(y_minbin)
+    y_maxbin = h.FindLastBinAbove(0,2)
+    high_y = h.GetYaxis().GetBinUpEdge(y_maxbin)
+
+    h.GetXaxis().SetRangeUser(low_x,high_x)
+    h.GetYaxis().SetRangeUser(low_y,high_y)
+
     c = TCanvas("c_%s" % name)
     h.Draw("colz texte")
 
