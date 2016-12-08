@@ -74,20 +74,20 @@ with open("output/central_shift.txt") as textfile1, open("output/upstream_shift.
             sig = (-eff[0]+eff[1])/math.sqrt(err[0]**2+err[1]**2+2*sys**2)
 
             if abs(sig) > 3:
-                print("%.2f %.2f %.2f %.2f %i %i %i" % (float(eff[0]),float(eff[1]),float(eff[2]), sig, theta_angle[theta], phi_angle[phi], l_dict[l]))
+                print("%.2f %.2f %.2f %.2f %.2f %.2f %.2f %i %i %i" % (float(eff[0]),float(err[0]),float(eff[1]), float(err[1]),float(eff[2]),float(err[2]),sig, theta_angle[theta], phi_angle[phi], l_dict[l]))
             h_sig.Fill(sig)
 
 
         if eff[0] != 0 and eff[2] != 0 and eff[0] != 1 and eff[2] != 1:
             sig = (eff[2]-eff[0])/math.sqrt(err[0]**2+err[2]**2+2*sys**2)
             if abs(sig) > 3:
-                print("%.2f %.2f %.2f %.2f %i %i %i" % (float(eff[0]),float(eff[1]),float(eff[2]), sig, theta_angle[theta], phi_angle[phi], l_dict[l]))
+                print("%.2f %.2f %.2f %.2f %.2f %.2f %.2f %i %i %i" % (float(eff[0]),float(err[0]),float(eff[1]), float(err[1]),float(eff[2]),float(err[2]),sig, theta_angle[theta], phi_angle[phi], l_dict[l]))
             h_sig.Fill(sig)
 
         if eff[1] != 0 and eff[2] != 0 and eff[1] != 1 and eff[2] != 1:
             sig = (-eff[1]+eff[2])/math.sqrt(err[1]**2+err[2]**2+2*sys**2)
             if abs(sig) > 3:
-                print("%.2f %.2f %.2f %.2f %i %i %i" % (float(eff[0]),float(eff[1]),float(eff[2]), sig, theta_angle[theta], phi_angle[phi], l_dict[l]))
+                print("%.2f %.2f %.2f %.2f %.2f %.2f %.2f %i %i %i" % (float(eff[0]),float(err[0]),float(eff[1]), float(err[1]),float(eff[2]),float(err[2]),sig, theta_angle[theta], phi_angle[phi], l_dict[l]))
             h_sig.Fill(sig)
 
 
