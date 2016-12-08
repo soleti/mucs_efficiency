@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.4
 
 import os
-from ROOT import TChain,  gStyle, gDirectory, TFile, TPad, TCanvas, TPolyLine3D, kGreen, kRed, kMagenta, kBlue
+from ROOT import TChain,  gStyle, gDirectory, TFile, TPad, TCanvas, TPolyLine3D, kGreen, kRed, kMagenta, kBlue, kGray
 import math
 
 
@@ -18,12 +18,12 @@ blue_lines_2D = []
 green_lines_2D = []
 
 chain = TChain("events_pandoraCosmic")
-chain.Add("../mucs_merged/CORSIKA.root")
-chain.Add("../mucs_merged/MuCSRun7347_Group181_MergedTree.Root") #downstream
-chain.Add("../mucs_merged/MuCSRun7348_Group181_MergedTree.Root") #downstream
-chain.Add("../mucs_merged/MuCSRun7702_Group182_MergedTree.Root") #upstream
+chain.Add("../root_files/CORSIKA.root")
+chain.Add("../root_files/MuCSRun7347_Group181_MergedTree.Root") #downstream
+chain.Add("../root_files/MuCSRun7348_Group181_MergedTree.Root") #downstream
+chain.Add("../root_files/MuCSRun7702_Group182_MergedTree.Root") #upstream
 
-chain.Add("../mucs_merged/MuCSRun7703_Group183_MergedTree.Root") #upstream
+chain.Add("../root_files/MuCSRun7703_Group183_MergedTree.Root") #upstream
 
 entries = chain.GetEntries()
 
@@ -34,7 +34,7 @@ for entry in range(entries):
     cosmic_pe = chain.flash_pe
     l_mucs = chain.MuCS_TPC_len
     if entry % 1000 == 0: print(entry)
-    if chain.MuCS_NHitsX < 8 and chain.MuCS_NHitsZ < 8 and l_mucs > 0 and cosmic_pe > 0:
+    if chain.MuCS_NHitsX < 8 and chain.MuCS_NHitsZ < 8 and l_mucs > 0 and cosmic_pe > 0 and entry % 50 == 0:
         x = chain.MuCS_Start_TPC[0]-chain.MuCS_Start[0]
         y = chain.MuCS_Start_TPC[1]-chain.MuCS_Start[1]
         z = chain.MuCS_Start_TPC[2]-chain.MuCS_Start[2]
@@ -93,7 +93,8 @@ for line in red_lines:
     line.SetLineColor(kMagenta+2)
     line.Draw()
 for line in blue_lines:
-    line.SetLineColor(kBlue)
+    line.SetLineColor(kGray+2)
+    line.SetLineStyle(2)
     line.Draw()
 for line in green_lines:
     line.SetLineColor(kGreen)
