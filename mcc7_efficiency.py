@@ -89,7 +89,7 @@ downstream_plane = [0,0,z_end]
 downstream_no = upstream_no
 
 print(entries)
-for entry in range(entries):
+for entry in range(1000):
 
     if entry % 10 == 0: print(entry)
 
