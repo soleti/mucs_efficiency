@@ -123,9 +123,9 @@ def draw_canvas_2d(name):
     h = gDirectory.Get("h_%s" % name)
     h.Divide(h_mc)
     h.GetZaxis().SetRangeUser(0.5,1.5)
-    h.GetZaxis().SetTitle("Data/Monte Carlo")
-    h.GetZaxis().RotateTitle()
-
+    #h.GetZaxis().SetTitle("Data/Monte Carlo")
+    #h.GetZaxis().RotateTitle()
+    h.SetMarkerSize(2)
     x_minbin = h.FindFirstBinAbove(0,1)
     low_x = h.GetXaxis().GetBinLowEdge(x_minbin)
     x_maxbin = h.FindLastBinAbove(0,1)
