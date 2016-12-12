@@ -38,7 +38,7 @@ g_product = TGraphErrors(len(product), array(tolerance_list), array(product), no
 
 
 g_product.Draw("APL")
-g_product.GetXaxis().SetTitle("Tolerance [cm]")
+g_product.GetXaxis().SetTitle("#it{d}_{max} [cm]")
 g_product.GetYaxis().SetTitle("[%]")
 g_product.GetYaxis().SetRangeUser(94, 100)
 
@@ -62,11 +62,11 @@ reco_eff_line.Draw()
 l = TLegend(0.46,0.16,0.89,0.33)
 l.SetBorderSize(0)
 l.SetShadowColor(0)
-l.AddEntry(g_eff,"Efficiency #epsilon", "lp")
-l.AddEntry(g_purity,"Purity", "lp")
-l.AddEntry(g_product,"Efficiency x Purity", "lp")
+l.AddEntry(g_eff,"Efficiency #it{#epsilon}", "lp")
+l.AddEntry(g_purity,"Purity #it{p}", "lp")
+l.AddEntry(g_product,"#it{#epsilon} x #it{p}", "lp")
 
-l.AddEntry(reco_eff_line,"Ideal efficiency", "l")
+l.AddEntry(reco_eff_line,"True efficiency #it{#epsilon}_{true}", "l")
 
 l.Draw()
 
