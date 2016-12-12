@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.4
 
-from ROOT import TPad, gPad, gDirectory, TFile, gStyle, TChain, TH1F, TH2F, TH3F, TLine, TCanvas, TPad, kRed, kGray, kBlue, TBox
+from ROOT import TPad, gPad, gDirectory, TFile, gStyle, TChain, TH1F, TH2F, TH3F, TLine, TCanvas, TPad, kRed, kGray, kBlue, TBox, TPaveText
 import math
 from geomUtil import isect_line_plane_v3
 bin_ang = 12
@@ -201,9 +201,22 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
             h_theta_phi_reco.SetBinContent(i,j,eff)
             h_theta_phi_reco.SetBinError(i,j,error)
 
+pt = TPaveText(0.10,0.905,0.40,0.98, "ndc")
+pt.AddText("MicroBooNE in progress")
+pt.SetFillColor(0)
+pt.SetBorderSize(0)
+pt.SetShadowColor(0)
+h_theta_phi_reco.GetXaxis().SetRangeUser(60,120)
+h_theta_phi_reco.GetYaxis().SetRangeUser(-90,-45)
+h_theta_phi_reco.GetZaxis().SetRangeUser(0,1)
+
+h_theta_phi_reco.SetMarkerSize(2)
 h_theta_phi_reco.Draw("colz texte")
+pt.Draw()
 h_theta_phi_reco.SaveAs("plots/mc/theta_phi_mcc7.root")
+
 c_theta_phi.Update()
+c_theta_phi.SaveAs("plots/mc/theta_phi_mc.pdf")
 
 c_theta_l = TCanvas("c_theta_l")
 for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
@@ -215,9 +228,16 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
             error = math.sqrt((eff*(1-eff))/geant)
             h_theta_l_reco.SetBinContent(i,j,eff)
             h_theta_l_reco.SetBinError(i,j,error)
+
+h_theta_l_reco.GetXaxis().SetRangeUser(60,120)
+h_theta_l_reco.GetYaxis().SetRangeUser(20,320)
+h_theta_l_reco.GetZaxis().SetRangeUser(0,1)
+h_theta_l_reco.SetMarkerSize(2)
 h_theta_l_reco.Draw("colz texte")
+pt.Draw()
 h_theta_l_reco.SaveAs("plots/mc/theta_l_mcc7.root")
 c_theta_l.Update()
+c_theta_l.SaveAs("plots/mc/theta_l_mc.pdf")
 
 c_phi_l = TCanvas("c_phi_l")
 for i in range(1,h_theta_phi_l_reco.GetNbinsY()+2):
@@ -229,9 +249,17 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsY()+2):
             error = math.sqrt((eff*(1-eff))/geant)
             h_phi_l_reco.SetBinContent(i,j,eff)
             h_phi_l_reco.SetBinError(i,j,error)
+
+h_phi_l_reco.GetXaxis().SetRangeUser(-90,-45)
+h_phi_l_reco.GetYaxis().SetRangeUser(20,320)
+h_phi_l_reco.GetZaxis().SetRangeUser(0,1)
+h_phi_l_reco.SetMarkerSize(2)
 h_phi_l_reco.Draw("colz texte")
+pt.Draw()
 h_phi_l_reco.SaveAs("plots/mc/phi_l_mcc7.root")
 c_phi_l.Update()
+c_phi_l.SaveAs("plots/mc/phi_l_mc.pdf")
+
 
 c_l = TCanvas("c_l")
 for i in range(1,h_theta_phi_l_reco.GetNbinsZ()+2):
