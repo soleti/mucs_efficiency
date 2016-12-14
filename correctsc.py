@@ -10,7 +10,7 @@ import random
 if len(sys.argv) > 1:
     filename = str(sys.argv[1])
 else:
-    filename = "/Users/soleti/uboone/root_files/CORSIKA.root"
+    filename = "../root_files/CORSIKA.root"
 
 if len(sys.argv) > 2:
     output = str(sys.argv[2])
