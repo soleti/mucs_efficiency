@@ -2,7 +2,17 @@
 
 from ROOT import TPad, gPad, gDirectory, TFile, gStyle, TChain, TH1F, TH2F, TH3F, TLine, TCanvas, TPad, kRed, kGray, kBlue, TBox, TPaveText
 import math
+import sys
+from glob import glob
 from geomUtil import isect_line_plane_v3
+
+if len(sys.argv) > 1:
+    position = sys.argv[1]
+else:
+    position = "all"
+
+print(position, "dataset")
+
 bin_ang = 12
 fidvol = 20
 bin_len = 8
@@ -13,6 +23,7 @@ y_start = -116.5
 y_end = 116.5
 z_start = 0
 z_end = 1036.8
+
 
 def getEff(h_num, h_den):
     h_num.Divide(h_den)
@@ -46,11 +57,23 @@ gStyle.SetPalette(87)
 gStyle.SetPaintTextFormat(".2f")
 gStyle.SetNumberContours(999)
 
-f = TFile("../root_files/mcc7_ana.root")
-chain = gDirectory.Get("analysistree/anatree")
+if position == "central_shift":
+    f = glob("../root_files/mucs_cry_overlay/*/ana_hist.root")
+elif position == "downstream_shift":
+    f = glob("../root_files/mucs_cry_overlay_downstream/*/ana_hist.root")
+elif position == "upstream_shift":
+    f = glob("../root_files/mucs_cry_overlay_upstream/*/ana_hist.root")
+elif position == "merged":
+    f = glob("../root_files/mucs_cry_overlay*/*/ana_hist.root")
+elif position == "all":
+    f = ["../root_files/mcc7_ana.root"]
+
+chain = TChain("analysistree/anatree")
+for filename in f:
+    chain.Add(filename)
+
 entries = chain.GetEntries()
-tot_prim = 0
-tot_reco = 0
+
 
 h_theta_phi_geant = TH2F("h_theta_phi_geant",";#theta [#circ];#phi [#circ]",bin_ang,0,180,bin_ang,-180,0)
 h_theta_phi_reco = TH2F("h_theta_phi_reco",";#theta [#circ];#phi [#circ]",bin_ang,0,180,bin_ang,-180,0)
@@ -89,7 +112,7 @@ downstream_plane = [0,0,z_end]
 downstream_no = upstream_no
 
 print(entries)
-for entry in range(1000):
+for entry in range(entries):
 
     if entry % 10 == 0: print(entry)
 
@@ -104,7 +127,13 @@ for entry in range(1000):
         y_endpoint = chain.EndPointy[i]
         z_endpoint = chain.EndPointz[i]
         mip = (x_endpoint < x_start or x_endpoint > x_end) and (y_endpoint < y_start or y_endpoint > y_end) and (z_endpoint < z_start or z_endpoint > z_end)
-        if chain.process_primary[i] == 1 and chain.inTPCDrifted[i] == 1:
+
+        if position != "all":
+            mucs_event = chain.StartPointy[i] > 390 and chain.StartPointy[i] < 399
+        else:
+            mucs_event = True
+
+        if chain.process_primary[i] == 1 and chain.inTPCDrifted[i] == 1 and mucs_event:
             x = chain.Px[i]
             y = chain.Py[i]
             z = chain.Pz[i]
