@@ -192,13 +192,15 @@ sys_errors_bins=sys_errors.readlines()
 for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
     for j in range(1, h_theta_phi_l_tpc.GetNbinsY()+2):
         for k in range(1, h_theta_phi_l_tpc.GetNbinsZ()+2):
-            if h_theta_phi_l_mucs.GetBinContent(i,j,k) and h_theta_phi_l_tpc.GetBinContent(i,j,k):
+            bin1 = i == 6 and j == 7 and k == 5
+            bin2 = i == 7 and j == 7 and k == 5
+
+            if h_theta_phi_l_mucs.GetBinContent(i,j,k) and h_theta_phi_l_tpc.GetBinContent(i,j,k) and not bin1 and not bin2:
 
                 eff = h_theta_phi_l_tpc.GetBinContent(i,j,k)/h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 mucs = h_theta_phi_l_mucs.GetBinContent(i,j,k)
                 error = math.sqrt((eff*(1-eff))/mucs)
-                if h_theta_phi_l_mucs.GetBinContent(i,j,k) < 50:
-                    print(i,j,k,eff,error,h_theta_phi_l_mucs.GetBinContent(i,j,k))
+
                 sys_error = float(sys_errors_bins[(i-1)*13*9+(j-1)*9+(k-1)].split()[3])
                 if sys_error < 0: sys_error = 0
 
@@ -242,7 +244,6 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
     tpc = sum([h_tpc.GetBinContent(i,j,k) for j in range(1,h_tpc.GetNbinsY()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
     mucs = sum([h_mucs.GetBinContent(i,j,k) for j in range(1,h_mucs.GetNbinsY()+2) for k in range(1,h_mucs.GetNbinsZ()+2)])
 
-    print(tpc,mucs)
     if tpc and mucs:
         h_theta_tpc.SetBinContent(i,tpc)
         h_theta_mucs.SetBinContent(i,mucs)
@@ -474,6 +475,7 @@ c_theta_phi_l = TCanvas("c_theta_phi_l","theta_phi_l")
 h_theta_phi_l_tpc.GetZaxis().SetTitleOffset(1.7)
 h_theta_phi_l_tpc.GetXaxis().SetTitleOffset(1.7)
 h_theta_phi_l_tpc.GetYaxis().SetTitleOffset(1.7)
+h_theta_phi_l_tpc.GetYaxis().SetNdivisions(505)
 h_theta_phi_l_tpc.GetXaxis().SetRangeUser(60,120)
 h_theta_phi_l_tpc.GetYaxis().SetRangeUser(-90,-45)
 h_theta_phi_l_tpc.GetZaxis().SetRangeUser(20,320)

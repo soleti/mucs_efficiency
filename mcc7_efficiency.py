@@ -112,7 +112,7 @@ downstream_plane = [0,0,z_end]
 downstream_no = upstream_no
 
 print(entries)
-for entry in range(entries):
+for entry in range(1000):
 
     if entry % 10 == 0: print(entry)
 
@@ -368,6 +368,7 @@ h_theta_phi_l_reco.Draw("glbox")
 h_theta_phi_l_reco.GetZaxis().SetTitleOffset(1.7)
 h_theta_phi_l_reco.GetXaxis().SetTitleOffset(1.7)
 h_theta_phi_l_reco.GetYaxis().SetTitleOffset(1.7)
+h_theta_phi_l_reco.GetYaxis().SetNdivisions(505)
 h_theta_phi_l_reco.GetXaxis().SetRangeUser(60,120)
 h_theta_phi_l_reco.GetYaxis().SetRangeUser(-90,-45)
 h_theta_phi_l_reco.GetZaxis().SetRangeUser(20,320)
