@@ -70,9 +70,9 @@ l = TLegend(0.46,0.16,0.89,0.33)
 l.SetBorderSize(0)
 l.SetShadowColor(0)
 l.AddEntry(g_eff,"Tagging efficiency #it{#epsilon}_{tag}", "lp")
-l.AddEntry(g_purity,"Purity #it{p}", "lp")
+l.AddEntry(g_purity,"Purity #it{P}", "lp")
 #l.AddEntry(g_product,"#it{#epsilon} x #it{p}", "lp")
-l.AddEntry(g_acceptance,"Acceptance #it{a}", "lp")
+l.AddEntry(g_acceptance,"Acceptance #it{A}", "lp")
 
 l.AddEntry(reco_eff_line,"Reconstruction efficiency #it{#epsilon}", "l")
 
