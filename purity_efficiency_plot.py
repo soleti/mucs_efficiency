@@ -84,10 +84,10 @@ l.SetShadowColor(0)
 l.AddEntry(g_purity,"Purity #it{P}", "lp")
 l.AddEntry(g_acceptance,"Acceptance #it{A}", "lp")
 
-l.AddEntry(g_eff,"MC tagging efficiency #it{#epsilon}_{tag}^{MC}", "lp")
+l.AddEntry(g_eff,"MuCS-MC tagging efficiency #it{#epsilon}_{tag}^{MuCS-MC}", "lp")
 l.AddEntry(g_data_eff,"Data tagging efficiency #it{#epsilon}_{tag}^{data}", "lp")
 
-l.AddEntry(g_reco_eff,"MC reconstruction efficiency #it{#epsilon}_{MC}", "lp")
+l.AddEntry(g_reco_eff,"MuCS-MC reconstruction efficiency #it{#epsilon}_{MuCS-MC}", "lp")
 l.AddEntry(g_reco_eff_data,"Data reconstruction efficiency #it{#epsilon}_{data}", "lp")
 
 l.Draw()
