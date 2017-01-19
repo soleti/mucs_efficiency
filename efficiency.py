@@ -3,7 +3,7 @@
 import os, sys
 import math
 from ROOT import TEfficiency
-from ROOT import TPad, gDirectory, TChain, TFile, TH1F, TH2F, TH3F, gStyle, TCanvas, gPad, TPaveText, kGray
+from ROOT import TPad, gDirectory, TChain, TFile, TH1F, TH2F, TH3F, gStyle, TCanvas, gPad, TPaveText, kGray, TLine, kRed
 from geomUtil import isect_line_plane_v3
 
 if len(sys.argv) > 1:
@@ -115,10 +115,12 @@ bin_len = 8
 h_theta_phi_l_tpc = TH3F("h_theta_phi_l_tpc",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 h_theta_phi_l_mucs = TH3F("h_theta_phi_l_mucs",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 
+l_corr = TH2F("l_corr",";L_{MuCS};L_{reco}",5,20,320,5,20,320)
+l_diff = TH1F("l_diff",";;L_{MuCS}-L_{reco}",200,-100,100)
 entries = chain.GetEntries()
 
 print(entries)
-
+wrong,right=[0]*5,[0]*5
 for entry in range(entries):
     if entry % 1000 == 0: print(entry)
     ientry = chain.LoadTree(entry)
@@ -165,10 +167,21 @@ for entry in range(entries):
                 h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, length)
                 dist = math.sqrt((chain.MuCS_Start_TPC[0]-chain.MinD_Start[0])**2+(chain.MuCS_Start_TPC[1]-chain.MinD_Start[1])**2)
                 dist2 = math.sqrt((chain.MuCS_Start_TPC[0]-chain.MinD_Start[0])**2+(chain.MuCS_Start_TPC[2]-chain.MinD_Start[2])**2)
+                bin_mucs = int((chain.MuCS_TPC_len-20)/60)
+                bin_reco = int((chain.MinD_len-20)/60)
+
                 if dist < 32:
+                    l_corr.Fill(chain.MuCS_TPC_len,chain.MinD_len)
+                    l_diff.Fill(chain.MuCS_TPC_len-chain.MinD_len)
                     h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, length)
+                    if bin_mucs != bin_reco:
+                        wrong[bin_mucs] += 1
+                    right[bin_mucs] += 1
 
 
+
+l_wrong = [a/b for a,b in zip(wrong,right)]
+print(sum(wrong),sum(right))
 eff = h_theta_phi_l_tpc.Integral()/h_theta_phi_l_mucs.Integral()
 err = math.sqrt((eff*(1-eff))/h_theta_phi_l_mucs.Integral())
 print("Integrated efficiency: %.1f +- %.1f" % (round(eff*100,1), round(err*100,1)))
@@ -300,9 +313,8 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsZ()+2):
         error = math.sqrt((eff*(1-eff))/mucs)
 
         print(i,eff,error,file=f_l)
-
-        sys_error = abs(float(l_sys[i-1].split()[1]))
-
+        print(l_wrong[i-1]/2*(1-eff))
+        sys_error = abs(float(l_sys[i-1].split()[1]))+l_wrong[i-1]/2*(1-eff)
         h_l.SetBinContent(i,eff)
         h_l.SetBinError(i,error)
         h_l_sys.SetBinContent(i,eff)
@@ -470,6 +482,22 @@ h_l.SaveAs("plots/%s/e_l_%s.root" % ("data" if data else "mc", algo))
 h_l_sys.SaveAs("plots/%s/e_l_sys_%s.root" % ("data" if data else "mc", algo))
 c_l.Update()
 
+c_l_corr = TCanvas("c_l_corr")
+for i in range(l_corr.GetNbinsX()):
+    for j in range(l_corr.GetNbinsY()):
+        if l_corr.GetBinContent(i,j) < 20:
+            l_corr.SetBinContent(i,j,0)
+l_corr.Draw("colz")
+line = TLine(20,20,320,320)
+line.SetLineWidth(2)
+line.SetLineColor(kRed)
+line.Draw()
+c_l_corr.Update()
+
+c_l_diff = TCanvas("c_l_diff")
+l_diff.Draw()
+c_l_diff.Update()
+
 gStyle.SetCanvasPreferGL(1)
 c_theta_phi_l = TCanvas("c_theta_phi_l","theta_phi_l")
 h_theta_phi_l_tpc.GetZaxis().SetTitleOffset(1.7)
@@ -481,7 +509,8 @@ h_theta_phi_l_tpc.GetYaxis().SetRangeUser(-90,-45)
 h_theta_phi_l_tpc.GetZaxis().SetRangeUser(20,320)
 h_theta_phi_l_tpc.Draw("glbox")
 h_theta_phi_l_tpc.SaveAs("plots/%s/e_theta_phi_l_%s.root" % ("data" if data else "mc", algo))
-
 c_theta_phi_l.Update()
+
+
 
 input()
