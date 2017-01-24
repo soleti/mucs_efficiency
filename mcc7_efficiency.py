@@ -146,8 +146,6 @@ for entry in range(1000):
 
             p0_geant = [chain.StartPointx_drifted[i], chain.StartPointy_drifted[i], chain.StartPointz_drifted[i]]
 
-
-
             for n in range(chain.ntracks_pandoraCosmic):
                 best = chain.trkpidbestplane_pandoraCosmic[n]
                 trkid = chain.trkidtruth_pandoraCosmic[3*n+best]
@@ -155,43 +153,15 @@ for entry in range(1000):
                 x1 = chain.trkstartx_pandoraCosmic[n]
                 y1 = chain.trkstarty_pandoraCosmic[n]
                 z1 = chain.trkstartz_pandoraCosmic[n]
-                # x_dir = chain.trkstartdcosx_pandoraCosmic[n]
-                # y_dir = chain.trkstartdcosy_pandoraCosmic[n]
-                # z_dir = chain.trkstartdcosz_pandoraCosmic[n]
-                # p_no_tpc = [0,1,0]
-                # p_tpc = [0,y_end,0]
-                #
-                #
 
                 p0 = [x1,y1,z1]
-                #p1 = [x1+x_dir,y1+y_dir,z1+z_dir]
-                # intersect_tpc = isect_line_plane_v3(p0,p1,p_tpc,p_no_tpc)
-                # anode_p = isect_line_plane_v3(p0, p1, anode_plane, anode_no)
-                # cathode_p = isect_line_plane_v3(p0, p1, cathode_plane, cathode_no)
-                # upstream_p = isect_line_plane_v3(p0, p1, upstream_plane, upstream_no)
-                # downstream_p = isect_line_plane_v3(p0, p1, downstream_plane, downstream_no)
-                # top_p = isect_line_plane_v3(p0, p1, top_plane, top_no)
-                # bottom_p = isect_line_plane_v3(p0, p1, bottom_plane, bottom_no)
-                #
-                # min_dist = 9999
-                # closest_point = []
-                # points = [anode_p, cathode_p, upstream_p, downstream_p, top_p, bottom_p]
-                # for point in points:
-                #
-                #     if point:
-                #         dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,point)]))
-                #         #print(point[0],point[1],point[2])
-                #         if point[0] >= x_start and point[0] <= x_end and point[1] >= y_start and point[1] <= y_end and point[2] >= z_start and point[2] <= z_end:
-                #             min_dist = dist
-                #             closest_point = point
-                #
+
                 dist = math.sqrt(sum([(a-b)**2 for a,b in zip(p0,p0_geant)]))
                 dist2 = math.sqrt((p0_geant[0]-p0[0])**2+(p0_geant[1]-p0[1])**2)
                 if trkid == chain.TrackId[i]:
                     h_dist.Fill(dist)
-                    if dist2 < 32:
-                        h_theta_phi_l_reco.Fill(theta, phi, l)
-                        break
+                    h_theta_phi_l_reco.Fill(theta, phi, l)
+                    break
 
 
 f_theta_phi_l = TFile("plots/data/e_theta_phi_l_pandoraCosmic.root")
