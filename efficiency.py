@@ -21,6 +21,8 @@ if len(sys.argv) > 3:
 else:
     algo = "pandoraCosmic"
 
+
+
 if data: print("Data efficiency")
 else: print("Monte Carlo efficiency")
 print(position, "dataset")
@@ -115,8 +117,6 @@ bin_len = 8
 h_theta_phi_l_tpc = TH3F("h_theta_phi_l_tpc",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 h_theta_phi_l_mucs = TH3F("h_theta_phi_l_mucs",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 
-l_corr = TH2F("l_corr",";L_{MuCS};L_{reco}",5,20,320,5,20,320)
-l_diff = TH1F("l_diff",";;L_{MuCS}-L_{reco}",200,-100,100)
 entries = chain.GetEntries()
 
 print(entries)
@@ -131,19 +131,19 @@ for entry in range(entries):
     cosmic_pe = chain.flash_pe
 
     # MIP fit
-    a = 7.316709647109627
-    b = -0.0979316568443668
-    c = 0.0005124018261413519
-    d = -1.020167027369585e-06
-
-    mip = l_mucs > 0 and cosmic_pe > 0# and cosmic_pe/l_mucs > a + b*x + c*x**2 +d*x**3 - 0.75
-
+    a = 7.71739e+00
+    b = -1.06721e-01
+    c = 5.82904e-04
+    d = -1.17978e-06
+    #print(a + b*(x-5) + c*(x-5)**2 +d*(x-5)**3)
+    mip = l_mucs > 0 and cosmic_pe > 0# and cosmic_pe/l_mucs > a + b*(x-5) + c*(x-5)**2 +d*(x-5)**3
+    print(mip)
     if chain.MuCS_NHitsX < 8 and chain.MuCS_NHitsZ < 8 and mip and chain.evt_number != 17453:
         x = chain.MuCS_Start_TPC[0]-chain.MuCS_Start[0]
         y = chain.MuCS_Start_TPC[1]-chain.MuCS_Start[1]
         z = chain.MuCS_Start_TPC[2]-chain.MuCS_Start[2]
         r = math.sqrt(x**2+y**2+z**2)
-
+        pe = chain.flash_pe
         theta_mucs = math.acos(z/r)
         theta_mucs = math.degrees(theta_mucs)
 
@@ -171,18 +171,10 @@ for entry in range(entries):
                 bin_reco = int((chain.MinD_len-20)/60)
 
                 if dist < 32:
-                    l_corr.Fill(chain.MuCS_TPC_len,chain.MinD_len)
-                    l_diff.Fill(chain.MuCS_TPC_len-chain.MinD_len)
                     h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, length)
-                    if bin_mucs != bin_reco:
-                        wrong[bin_mucs] += 1
-                    right[bin_mucs] += 1
 
 
-
-l_wrong = [a/b for a,b in zip(wrong,right)]
-print(sum(wrong),sum(right))
-eff = h_theta_phi_l_tpc.Integral()/h_theta_phi_l_mucs.Integral()
+eff = h_theta_phi_l_tpc.Integral()/(h_theta_phi_l_mucs.Integral())
 err = math.sqrt((eff*(1-eff))/h_theta_phi_l_mucs.Integral())
 print("Integrated efficiency: %.1f +- %.1f" % (round(eff*100,1), round(err*100,1)))
 for i in range(1, h_theta_phi_l_tpc.GetNbinsX()+2):
@@ -252,6 +244,9 @@ theta_sys=f_theta_sys.readlines()
 h_theta_tpc = TH1F("h_theta_tpc","",bin_ang,0,180)
 h_theta_mucs = TH1F("h_theta_mucs","",bin_ang,0,180)
 
+dif_corr = 0.01
+dif_corr_err = 0.001
+
 for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
 
     tpc = sum([h_tpc.GetBinContent(i,j,k) for j in range(1,h_tpc.GetNbinsY()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
@@ -260,9 +255,9 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
     if tpc and mucs:
         h_theta_tpc.SetBinContent(i,tpc)
         h_theta_mucs.SetBinContent(i,mucs)
-        eff = tpc/mucs
+        eff = tpc/mucs+dif_corr
         error = math.sqrt((eff*(1-eff))/mucs)
-        sys_error = abs(float(theta_sys[i-1].split()[1]))
+        sys_error = abs(float(theta_sys[i-1].split()[1]))+dif_corr_err
 
         print(i,eff,error,file=f_theta)
         h_theta.SetBinContent(i,eff)
@@ -272,9 +267,7 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
     else:
         print(i,0,0,file=f_theta)
 
-e_theta = TEfficiency(h_theta_tpc,h_theta_mucs)
-e_theta.SetStatisticOption(TEfficiency.kBBayesian)
-e_theta.SetConfidenceLevel(0.683)
+
 f_theta.close()
 f_theta_sys.close()
 
@@ -287,12 +280,12 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
     mucs = sum([h_mucs.GetBinContent(j,i,k) for j in range(1,h_mucs.GetNbinsX()+2) for k in range(1,h_mucs.GetNbinsZ()+2)])
 
     if tpc and mucs:
-        eff = tpc/mucs
+        eff = tpc/mucs+dif_corr
         error = math.sqrt((eff*(1-eff))/mucs)
 
         print(i,eff,error,file=f_phi)
 
-        sys_error = abs(float(phi_sys[i-1].split()[1]))
+        sys_error = abs(float(phi_sys[i-1].split()[1]))+dif_corr_err
 
         h_phi.SetBinContent(i,eff)
         h_phi.SetBinError(i,error)
@@ -309,12 +302,12 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsZ()+2):
     tpc = sum([h_tpc.GetBinContent(j,k,i) for j in range(1,h_tpc.GetNbinsX()+2) for k in range(1,h_tpc.GetNbinsY()+2)])
     mucs = sum([h_mucs.GetBinContent(j,k,i) for j in range(1,h_mucs.GetNbinsX()+2) for k in range(1,h_mucs.GetNbinsY()+2)])
     if tpc and mucs:
-        eff = tpc/mucs
+        eff = tpc/mucs+dif_corr
         error = math.sqrt((eff*(1-eff))/mucs)
 
         print(i,eff,error,file=f_l)
-        print(l_wrong[i-1]/2*(1-eff))
-        sys_error = abs(float(l_sys[i-1].split()[1]))+l_wrong[i-1]/2*(1-eff)
+        sys_error = abs(float(l_sys[i-1].split()[1]))+dif_corr_err
+
         h_l.SetBinContent(i,eff)
         h_l.SetBinError(i,error)
         h_l_sys.SetBinContent(i,eff)
@@ -336,12 +329,12 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
         tpc = sum([h_tpc.GetBinContent(i,j,k) for k in range(1,h_tpc.GetNbinsZ()+2)])
         mucs = sum([h_mucs.GetBinContent(i,j,k) for k in range(1,h_mucs.GetNbinsZ()+2)])
         if mucs and tpc:
-            eff = tpc/mucs
+            eff = tpc/mucs+dif_corr
             error = math.sqrt((eff*(1-eff))/mucs)
 
             print(i,eff,error,file=f_theta_phi)
 
-            sys_error = float(theta_phi_sys[(i-1)*13+(j-1)].split()[1])
+            sys_error = float(theta_phi_sys[(i-1)*13+(j-1)].split()[1])+dif_corr_err
 
             h_theta_phi.SetBinContent(i,j,eff)
             h_theta_phi.SetBinError(i,j,math.sqrt(sys_error**2+error**2))
@@ -357,12 +350,12 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
         tpc = sum([h_tpc.GetBinContent(i,k,j) for k in range(1,h_tpc.GetNbinsY()+2)])
         mucs = sum([h_mucs.GetBinContent(i,k,j) for k in range(1,h_mucs.GetNbinsY()+2)])
         if tpc and mucs:
-            eff = tpc/mucs
+            eff = tpc/mucs+dif_corr
             error = math.sqrt((eff*(1-eff))/mucs)
 
             print(i,eff,error,file=f_theta_l)
 
-            sys_error = float(theta_l_sys[(i-1)*9+(j-1)].split()[1])
+            sys_error = float(theta_l_sys[(i-1)*9+(j-1)].split()[1])+dif_corr_err
             if sys_error < 0: sys_error = 0
 
             h_theta_l.SetBinContent(i,j,eff)
@@ -380,11 +373,11 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
         tpc = sum([h_tpc.GetBinContent(k,i,j) for k in range(1,h_tpc.GetNbinsX()+2)])
         mucs = sum([h_mucs.GetBinContent(k,i,j) for k in range(1,h_mucs.GetNbinsX()+2)])
         if tpc and mucs:
-            eff = tpc/mucs
+            eff = tpc/mucs+dif_corr
             error = math.sqrt((eff*(1-eff))/mucs)
 
             print(i,eff,error,file=f_phi_l)
-            sys_error = float(phi_l_sys[(i-1)*9+(j-1)].split()[1])
+            sys_error = float(phi_l_sys[(i-1)*9+(j-1)].split()[1])+dif_corr_err
             if sys_error < 0: sys_error = 0
 
             h_phi_l.SetBinContent(i,j,eff)
@@ -458,8 +451,6 @@ h_theta_sys.GetYaxis().SetRangeUser(0,1)
 h_theta.SetMarkerStyle(20)
 h_theta.SaveAs("plots/%s/e_theta_%s.root" % ("data" if data else "mc", algo))
 h_theta_sys.SaveAs("plots/%s/e_theta_sys_%s.root" % ("data" if data else "mc", algo))
-e_theta.Draw("P SAME")
-e_theta.SaveAs("plots/data/eff_theta_pandoraCosmic.root")
 c_theta.Update()
 
 c_phi = TCanvas("c_phi","phi")
@@ -472,32 +463,6 @@ h_phi.SaveAs("plots/%s/e_phi_%s.root" % ("data" if data else "mc", algo))
 h_phi_sys.SaveAs("plots/%s/e_phi_sys_%s.root" % ("data" if data else "mc", algo))
 c_phi.Update()
 
-c_l = TCanvas("c_l","l")
-c_l.cd()
-
-h_l_sys.Draw("p")
-h_l_sys.GetYaxis().SetRangeUser(0,1)
-h_l.SetMarkerStyle(20)
-h_l.SaveAs("plots/%s/e_l_%s.root" % ("data" if data else "mc", algo))
-h_l_sys.SaveAs("plots/%s/e_l_sys_%s.root" % ("data" if data else "mc", algo))
-c_l.Update()
-
-c_l_corr = TCanvas("c_l_corr")
-for i in range(l_corr.GetNbinsX()):
-    for j in range(l_corr.GetNbinsY()):
-        if l_corr.GetBinContent(i,j) < 20:
-            l_corr.SetBinContent(i,j,0)
-l_corr.Draw("colz")
-line = TLine(20,20,320,320)
-line.SetLineWidth(2)
-line.SetLineColor(kRed)
-line.Draw()
-c_l_corr.Update()
-
-c_l_diff = TCanvas("c_l_diff")
-l_diff.Draw()
-c_l_diff.Update()
-
 gStyle.SetCanvasPreferGL(1)
 c_theta_phi_l = TCanvas("c_theta_phi_l","theta_phi_l")
 h_theta_phi_l_tpc.GetZaxis().SetTitleOffset(1.7)
@@ -509,8 +474,7 @@ h_theta_phi_l_tpc.GetYaxis().SetRangeUser(-90,-45)
 h_theta_phi_l_tpc.GetZaxis().SetRangeUser(20,320)
 h_theta_phi_l_tpc.Draw("glbox")
 h_theta_phi_l_tpc.SaveAs("plots/%s/e_theta_phi_l_%s.root" % ("data" if data else "mc", algo))
+
 c_theta_phi_l.Update()
-
-
 
 input()
