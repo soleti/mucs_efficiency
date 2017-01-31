@@ -137,7 +137,7 @@ for entry in range(entries):
     d = -1.17978e-06
     #print(a + b*(x-5) + c*(x-5)**2 +d*(x-5)**3)
     mip = l_mucs > 0 and cosmic_pe > 0# and cosmic_pe/l_mucs > a + b*(x-5) + c*(x-5)**2 +d*(x-5)**3
-    print(mip)
+
     if chain.MuCS_NHitsX < 8 and chain.MuCS_NHitsZ < 8 and mip and chain.evt_number != 17453:
         x = chain.MuCS_Start_TPC[0]-chain.MuCS_Start[0]
         y = chain.MuCS_Start_TPC[1]-chain.MuCS_Start[1]
@@ -330,6 +330,7 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
         mucs = sum([h_mucs.GetBinContent(i,j,k) for k in range(1,h_mucs.GetNbinsZ()+2)])
         if mucs and tpc:
             eff = tpc/mucs+dif_corr
+            print(eff)
             error = math.sqrt((eff*(1-eff))/mucs)
 
             print(i,eff,error,file=f_theta_phi)
