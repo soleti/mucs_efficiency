@@ -3,7 +3,7 @@
 import os, sys
 import math
 from ROOT import TEfficiency
-from ROOT import TPad, gDirectory, TChain, TFile, TH1F, TH2F, TH3F, gStyle, TCanvas, gPad, TPaveText, kGray, TLine, kRed
+from ROOT import TPad, gDirectory, TChain, TFile, TH1F, TH2F, TH3F, gStyle, TCanvas, gPad, TPaveText, kGray, TLine, kRed, TF1
 from geomUtil import isect_line_plane_v3
 
 if len(sys.argv) > 1:
@@ -116,7 +116,7 @@ bin_ang = 12
 bin_len = 8
 h_theta_phi_l_tpc = TH3F("h_theta_phi_l_tpc",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
 h_theta_phi_l_mucs = TH3F("h_theta_phi_l_mucs",";#theta [#circ]; #phi [#circ]; L [cm]",bin_ang,0,180,bin_ang,-180,0,bin_len,fidvol,500)
-
+h_dist = TH1F("h_dist",";Distance [cm]; N. Entries / 1 cm", 60, 0, 60)
 entries = chain.GetEntries()
 
 print(entries)
@@ -167,9 +167,12 @@ for entry in range(entries):
                 h_theta_phi_l_mucs.Fill(theta_mucs, phi_mucs, length)
                 dist = math.sqrt((chain.MuCS_Start_TPC[0]-chain.MinD_Start[0])**2+(chain.MuCS_Start_TPC[1]-chain.MinD_Start[1])**2)
                 dist2 = math.sqrt((chain.MuCS_Start_TPC[0]-chain.MinD_Start[0])**2+(chain.MuCS_Start_TPC[2]-chain.MinD_Start[2])**2)
+                dist3 = math.sqrt((chain.MuCS_Start_TPC[0]-chain.MinD_Start[0])**2+(chain.MuCS_Start_TPC[1]-chain.MinD_Start[1])**2+(chain.MuCS_Start_TPC[2]-chain.MinD_Start[2])**2)
+
                 bin_mucs = int((chain.MuCS_TPC_len-20)/60)
                 bin_reco = int((chain.MinD_len-20)/60)
 
+                h_dist.Fill(dist2)
                 if dist < 32:
                     h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, length)
 
@@ -330,7 +333,7 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
         mucs = sum([h_mucs.GetBinContent(i,j,k) for k in range(1,h_mucs.GetNbinsZ()+2)])
         if mucs and tpc:
             eff = tpc/mucs+dif_corr
-            print(eff)
+            #print(eff)
             error = math.sqrt((eff*(1-eff))/mucs)
 
             print(i,eff,error,file=f_theta_phi)
@@ -398,7 +401,7 @@ h_theta_phi.SetLineColor(kGray+2)
 #gPad.SetRightMargin(0.15)
 h_theta_phi.GetZaxis().SetRangeUser(0,1)
 pt = TPaveText(0.10,0.905,0.40,0.98, "ndc")
-pt.AddText("MicroBooNE in progress")
+#pt.AddText("MicroBooNE in progress")
 pt.SetFillColor(0)
 pt.SetBorderSize(0)
 pt.SetShadowColor(0)
@@ -463,6 +466,19 @@ h_phi.SetMarkerStyle(20)
 h_phi.SaveAs("plots/%s/e_phi_%s.root" % ("data" if data else "mc", algo))
 h_phi_sys.SaveAs("plots/%s/e_phi_sys_%s.root" % ("data" if data else "mc", algo))
 c_phi.Update()
+
+c_dist = TCanvas("c_dist")
+h_dist_mc = TH1F("h_dist_mc","",60,0,60)
+f = TF1("f","landau",0,60)
+f.SetParameters(10940,3.8,1.5)
+h_dist_mc.FillRandom("f",int(h_dist.GetEntries()))
+h_dist.Draw()
+h_dist_mc.SetLineColor(kRed+1)
+h_dist_mc.Draw("same")
+h_dist.GetYaxis().SetRangeUser(0.001,1900)
+limit = TLine(32,0.001,32,1900)
+limit.Draw()
+c_dist.Update()
 
 gStyle.SetCanvasPreferGL(1)
 c_theta_phi_l = TCanvas("c_theta_phi_l","theta_phi_l")
