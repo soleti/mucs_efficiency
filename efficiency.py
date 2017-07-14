@@ -3,7 +3,7 @@
 import os, sys
 import math
 from ROOT import TEfficiency
-from ROOT import TPad, gDirectory, TChain, TFile, TH1F, TH2F, TH3F, gStyle, TCanvas, gPad, TPaveText, kGray, TLine, kRed, TF1
+from ROOT import TPad, gDirectory, TChain, TFile, TH1F, TH2F, TH3F, gStyle, TCanvas, gPad, TPaveText, kGray, TLine, kRed, TF1, TLegend
 from geomUtil import isect_line_plane_v3
 
 if len(sys.argv) > 1:
@@ -70,7 +70,7 @@ def extrapolate3D(hist):
 
 
 gStyle.SetOptStat(0)
-gStyle.SetPalette(87)
+gStyle.SetPalette(57)
 gStyle.SetPaintTextFormat(".2f")
 gStyle.SetNumberContours(999)
 
@@ -176,7 +176,7 @@ for entry in range(entries):
                 if dist < 32:
                     h_theta_phi_l_tpc.Fill(theta_mucs, phi_mucs, length)
 
-
+print("Number of events: ", h_theta_phi_l_mucs.Integral())
 eff = h_theta_phi_l_tpc.Integral()/(h_theta_phi_l_mucs.Integral())
 err = math.sqrt((eff*(1-eff))/h_theta_phi_l_mucs.Integral())
 print("Integrated efficiency: %.1f +- %.1f" % (round(eff*100,1), round(err*100,1)))
@@ -278,6 +278,8 @@ f_phi = open("output/phi_%s.txt" % position,"w")
 f_phi_sys = open("output/sys_errors_phi.txt","r")
 phi_sys = f_phi_sys.readlines()
 
+h_phi_mucs = TH1F("h_phi_mucs","",bin_ang,-180,0)
+
 for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
     tpc = sum([h_tpc.GetBinContent(j,i,k) for j in range(1,h_tpc.GetNbinsX()+2) for k in range(1,h_tpc.GetNbinsZ()+2)])
     mucs = sum([h_mucs.GetBinContent(j,i,k) for j in range(1,h_mucs.GetNbinsX()+2) for k in range(1,h_mucs.GetNbinsZ()+2)])
@@ -285,7 +287,7 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
     if tpc and mucs:
         eff = tpc/mucs+dif_corr
         error = math.sqrt((eff*(1-eff))/mucs)
-
+        h_phi_mucs.SetBinContent(i,mucs)
         print(i,eff,error,file=f_phi)
 
         sys_error = abs(float(phi_sys[i-1].split()[1]))+dif_corr_err
@@ -334,7 +336,8 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsX()+2):
         if mucs and tpc:
             eff = tpc/mucs+dif_corr
             #print(eff)
-            error = math.sqrt((eff*(1-eff))/mucs)
+            if eff<1:
+                error = math.sqrt((eff*(1-eff))/mucs)
 
             print(i,eff,error,file=f_theta_phi)
 
@@ -378,7 +381,8 @@ for i in range(1,h_theta_phi_l_tpc.GetNbinsY()+2):
         mucs = sum([h_mucs.GetBinContent(k,i,j) for k in range(1,h_mucs.GetNbinsX()+2)])
         if tpc and mucs:
             eff = tpc/mucs+dif_corr
-            error = math.sqrt((eff*(1-eff))/mucs)
+            if eff<1:
+                error = math.sqrt((eff*(1-eff))/mucs)
 
             print(i,eff,error,file=f_phi_l)
             sys_error = float(phi_l_sys[(i-1)*9+(j-1)].split()[1])+dif_corr_err
@@ -400,16 +404,27 @@ h_theta_phi.SetLineColor(kGray+2)
 #h_theta_phi.GetZaxis().RotateTitle()
 #gPad.SetRightMargin(0.15)
 h_theta_phi.GetZaxis().SetRangeUser(0,1)
-pt = TPaveText(0.10,0.905,0.40,0.98, "ndc")
-#pt.AddText("MicroBooNE in progress")
+
+h_theta_phi.GetXaxis().SetRangeUser(60,120)
+h_theta_phi.GetYaxis().SetRangeUser(-90,-45)
+h_theta_phi.SetMarkerSize(2.5)
+gPad.SetBottomMargin(0.17)
+gPad.SetLeftMargin(0.13)
+gPad.SetTopMargin(0.15)
+gPad.SetRightMargin(0.15)
+
+h_theta_phi.GetYaxis().SetTitleSize(0.07)
+h_theta_phi.GetXaxis().SetTitleSize(0.07)
+h_theta_phi.GetYaxis().SetTitleOffset(0.8)
+
+pt = TPaveText(0.13,0.855,0.42,0.98, "ndc")
+pt.AddText("MicroBooNE")
 pt.SetFillColor(0)
 pt.SetBorderSize(0)
 pt.SetShadowColor(0)
-pt.Draw()
-h_theta_phi.GetXaxis().SetRangeUser(60,120)
-h_theta_phi.GetYaxis().SetRangeUser(-90,-45)
-h_theta_phi.SetMarkerSize(2)
+h_theta_phi.Draw("colz texte")
 
+pt.Draw()
 h_theta_phi.SaveAs("plots/%s/e_theta_phi_%s.root" % ("data" if data else "mc",algo))
 c_theta_phi.SaveAs("plots/%s/e_theta_phi.pdf" % ("data" if data else "mc"))
 
@@ -420,10 +435,21 @@ c_theta_l.cd()
 
 h_theta_l.Draw("colz texte")
 h_theta_l.GetZaxis().SetRangeUser(0,1)
-pt.Draw()
 h_theta_l.GetXaxis().SetRangeUser(60,120)
 h_theta_l.GetYaxis().SetRangeUser(20,320)
-h_theta_l.SetMarkerSize(2)
+h_theta_l.SetMarkerSize(2.5)
+gPad.SetBottomMargin(0.17)
+gPad.SetLeftMargin(0.13)
+gPad.SetTopMargin(0.15)
+gPad.SetRightMargin(0.15)
+
+h_theta_l.GetYaxis().SetTitleSize(0.07)
+h_theta_l.GetXaxis().SetTitleSize(0.07)
+h_theta_l.GetYaxis().SetTitleOffset(0.8)
+
+h_theta_l.Draw("colz texte")
+
+pt.Draw()
 h_theta_l.SaveAs("plots/%s/e_theta_l_%s.root" % ("data" if data else "mc",algo))
 c_theta_l.SaveAs("plots/%s/e_theta_l.pdf" % ("data" if data else "mc"))
 
@@ -436,10 +462,21 @@ c_phi_l.cd()
 
 h_phi_l.Draw("colz texte")
 h_phi_l.GetZaxis().SetRangeUser(0,1)
-pt.Draw()
 h_phi_l.GetXaxis().SetRangeUser(-90,-45)
 h_phi_l.GetYaxis().SetRangeUser(20,320)
-h_phi_l.SetMarkerSize(2)
+h_phi_l.SetMarkerSize(2.5)
+gPad.SetBottomMargin(0.17)
+gPad.SetLeftMargin(0.13)
+gPad.SetTopMargin(0.15)
+gPad.SetRightMargin(0.15)
+
+h_phi_l.GetYaxis().SetTitleSize(0.07)
+h_phi_l.GetXaxis().SetTitleSize(0.07)
+h_phi_l.GetYaxis().SetTitleOffset(0.8)
+
+h_phi_l.Draw("colz texte")
+
+pt.Draw()
 h_phi_l.SaveAs("plots/%s/e_phi_l_%s.root" % ("data" if data else "mc", algo))
 c_phi_l.SaveAs("plots/%s/e_phi_l.pdf" % ("data" if data else "mc"))
 
@@ -472,12 +509,27 @@ h_dist_mc = TH1F("h_dist_mc","",60,0,60)
 f = TF1("f","landau",0,60)
 f.SetParameters(10940,3.8,1.5)
 h_dist_mc.FillRandom("f",int(h_dist.GetEntries()))
-h_dist.Draw()
+h_dist.Draw("ep")
+gPad.SetLeftMargin(0.13)
+h_dist.SetLineColor(1)
 h_dist_mc.SetLineColor(kRed+1)
 h_dist_mc.Draw("same")
-h_dist.GetYaxis().SetRangeUser(0.001,1900)
-limit = TLine(32,0.001,32,1900)
+h_dist.SetMarkerStyle(20)
+h_dist.GetYaxis().SetRangeUser(0.001,2499)
+limit = TLine(32,0.001,32,2499)
+limit.SetLineStyle(2)
+limit.SetLineWidth(2)
 limit.Draw()
+leg = TLegend(0.61,0.75,0.84,0.87)
+leg.AddEntry(h_dist,"Data","ep")
+leg.AddEntry(h_dist_mc,"MuCS Monte Carlo","l")
+leg.Draw()
+pt = TPaveText(0.1,0.91,0.39,0.98, "ndc")
+pt.AddText("MicroBooNE")
+pt.SetFillColor(0)
+pt.SetBorderSize(0)
+pt.SetShadowColor(0)
+pt.Draw()
 c_dist.Update()
 
 gStyle.SetCanvasPreferGL(1)
@@ -494,4 +546,9 @@ h_theta_phi_l_tpc.SaveAs("plots/%s/e_theta_phi_l_%s.root" % ("data" if data else
 
 c_theta_phi_l.Update()
 
+f_data = TFile("f_data.root","RECREATE")
+h_theta_mucs.Write()
+h_phi_mucs.Write()
+h_mucs.Write()
+f_data.Close()
 input()

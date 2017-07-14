@@ -33,7 +33,7 @@ def correct_theta_xy(theta_xy, start_point, f_correction):
     angle = theta_xy
     second_point = [start_point[0]+math.tan(math.radians(angle)), start_point[1]-1+y_end-f_correction(start_point[0]+math.tan(math.radians(angle)))]
     first_point = [start_point[0], start_point[1]+y_end-f_correction(start_point[0])]
-    
+
     return -math.degrees(math.atan(second_point[0]-first_point[0])/(second_point[1]-first_point[1]))
 
 gStyle.SetOptStat(0)
@@ -91,21 +91,21 @@ print(entries)
 for entry in range(entries-162):
     ientry = chain.LoadTree(entry)
     nb = chain.GetEntry(entry)
-    
+
     x = chain.Tagged_Start[0]
     y = chain.Tagged_Start[1]
     z = chain.Tagged_Start[2]
-    
+
     x2 = chain.Tagged_End[0]
     y2 = chain.Tagged_End[1]
-    z2 = chain.Tagged_End[2] 
+    z2 = chain.Tagged_End[2]
 
     if x:
     #   x+=25.35
     #   x2+=25.35
         x-=2
         x2-=2
-    
+
     cosmic_pe = chain.flash_pe
     l = chain.MuCS_TPC_len
     x_mucs = chain.MuCS_Start_TPC[0]
@@ -137,7 +137,7 @@ for i,h in enumerate(h_xys):
         errors_y_start.append(h.GetRMS()/math.sqrt(h.GetEntries()))
     except:
         continue
-        
+
 max_start[9] = 104
 errors_x = array("d", [binning/2]*len(h_xys))
 index = array("d",[(i+0.5)*binning for i,h in enumerate(h_xys)])
@@ -216,15 +216,15 @@ average_yz = 0
 n_yz = 0
 for entry in range(entries-162):
     #ientry = chain.LoadTree(entry)
-    
+
     nb = chain.GetEntry(entry)
-    
+
     l = chain.MuCS_TPC_len
     x_mucs = chain.MuCS_Start_TPC[0]
     cosmic_pe = chain.flash_pe
 
     mip = l and cosmic_pe
-    
+
     x = chain.Tagged_Start[0]
     y = chain.Tagged_Start[1]
     z = chain.Tagged_Start[2]
@@ -236,11 +236,11 @@ for entry in range(entries-162):
     x_mc = chain.MCTagged_Start[0]
     y_mc = chain.MCTagged_Start[1]
     z_mc = chain.MCTagged_Start[2]
-    
+
     x2_mc = chain.MCTagged_End[0]
     y2_mc = chain.MCTagged_End[1]
     z2_mc = chain.MCTagged_End[2]
-    
+
     y_corr = 0
     y_corr_2 = 0
 
@@ -263,47 +263,47 @@ for entry in range(entries-162):
             y_corr_2 = f3(x2,y2)
         else:
             y_corr_2 = f4(x2,y2)
-            
+
 
         h_xy_mc.Fill(x_mc,y_mc)
         h_xy_mc.Fill(x2_mc,y2_mc)
 
         #h_xy_corr.Fill(x,y)
         #h_xy_corr.Fill(x2,y2)
-        
+
         h_xy_corr.Fill(x,y_corr)
         h_xy_corr.Fill(x2,y_corr_2)
-        
+
         h_yz.Fill(z,y)
         h_yz.Fill(z2,y2)
-        
+
         h_yz_mc.Fill(z_mc,y_mc)
         h_yz_mc.Fill(z2_mc,y2_mc)
-        
+
         h_yz_corr.Fill(z,y_corr)
         h_yz_corr.Fill(z2,y_corr_2)
 
         xy_mucs = 0
         yz_mucs = 0
-        
+
         h_xy_res.Fill(x2_mc-x2,y2_mc-y2)
         h_xy_res_corr.Fill(x2_mc-x2,y2_mc-y_corr_2)
-        
+
         if chain.MuCS_Start_TPC[0]-chain.MuCS_Start[0] and chain.MuCS_Start_TPC[2]-chain.MuCS_Start[2]:
             xy_mucs = math.degrees(math.atan((chain.MuCS_Start_TPC[1]-chain.MuCS_Start[1])/(chain.MuCS_Start_TPC[0]-chain.MuCS_Start[0])))
             yz_mucs = math.degrees(math.atan((chain.MuCS_Start_TPC[1]-chain.MuCS_Start[1])/(chain.MuCS_Start_TPC[2]-chain.MuCS_Start[2])))
-        
-        
+
+
         if x2_mc-x_mc and z2_mc-z_mc:
             xy_mc = math.degrees(math.atan((y2_mc-y_mc)/(x2_mc-x_mc)))
             yz_mc = math.degrees(math.atan((y2_mc-y_mc)/(z2_mc-z_mc)))
 
-            if xy_mucs: 
+            if xy_mucs:
                 average_xy += math.degrees(chain.MuCS_theta_xy_rms)
                 n_xy += 1
                 h_theta_res_xy_mc.Fill(xy_mucs-xy_mc+random.gauss(0,math.degrees(chain.MuCS_theta_xy_rms)))
                 h_l_res_mc.Fill(chain.MuCS_TPC_len-chain.MCTagged_len)
-            if yz_mucs: 
+            if yz_mucs:
                 average_yz += math.degrees(chain.MuCS_theta_yz_rms)
                 n_yz += 1
                 h_theta_res_yz_mc.Fill(yz_mucs-yz_mc+random.gauss(0,math.degrees(chain.MuCS_theta_yz_rms)))
@@ -313,28 +313,28 @@ for entry in range(entries-162):
             theta_yz = math.atan((y-y2)/(z-z2))+0.034
             theta_xy_corr = math.atan((y_corr-y_corr_2)/(x-x2))
             theta_yz_corr = math.atan((y_corr-y_corr_2)/(z-z2))+0.034
-            
+
             if yz_mucs:
                 h_theta_res_yz.Fill(yz_mucs-math.degrees(theta_yz))
                 h_theta_res_yz_corr.Fill(yz_mucs-math.degrees(theta_yz_corr))
-                
-            if xy_mucs: 
+
+            if xy_mucs:
                 h_l_theta.Fill(chain.MuCS_TPC_len-chain.Tagged_len,math.degrees(theta_xy))
                 if x2 > 250:
                     h_l_res.Fill(chain.MuCS_TPC_len-8./math.cos(-theta_xy)-chain.Tagged_len)
                 else:
                     h_l_res.Fill(chain.MuCS_TPC_len-chain.Tagged_len)
-                    
+
                 h_l_res_corr.Fill(chain.MuCS_TPC_len-chain.Tagged_len)
-                
+
                 #if chain.MuCS_TPC_len-chain.Tagged_len > 60  and chain.MuCS_TPC_len-chain.Tagged_len < 60.2:
-                #    print chain.evt_number, xy_mucs, math.degrees(theta_xy)+1.7, x, y_corr      
+                #    print chain.evt_number, xy_mucs, math.degrees(theta_xy)+1.7, x, y_corr
                 #    event = gDirectory.Get("tdviewpandoraCosmic_"+str(chain.evt_number))
                 #    event.Draw()
                 h_res_xy.Fill(xy_mucs-math.degrees(theta_xy_corr)+1.25, x_mucs)
                 h_theta_res_xy.Fill(xy_mucs-math.degrees(theta_xy)+1.25)
                 h_theta_res_xy_corr.Fill(xy_mucs-math.degrees(theta_xy_corr)+1.25)
-                
+
 
 print("xy",average_xy/n_xy)
 print("yz",average_yz/n_yz)
@@ -440,17 +440,17 @@ tpc_xy.SetLineStyle(2)
 tpc_xy.SetFillStyle(0)
 tpc_xy.SetFillStyle(0)
 tpc_xy.SetLineWidth(3)
-#h_xy.Draw("col")
+h_xy.Draw("col")
 h_xy.GetYaxis().SetTitleOffset(1.3)
 
-h_xy_corr.Draw("col")
+#h_xy_corr.Draw("col")
 h_xy_corr.GetYaxis().SetTitleOffset(1.3)
 preliminary = TPaveText(0.48,0.74,0.81,0.84,"NDC")
 preliminary.SetShadowColor(0)
 preliminary.SetBorderSize(0)
 preliminary.SetFillStyle(0)
 preliminary.AddText("MicroBooNE Preliminary")
-preliminary.Draw()
+#preliminary.Draw()
 tpc_xy.Draw()
 
 g_end.Draw("P")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.4
 
-from ROOT import TGraphErrors, TCanvas, TLegend, TLine
+from ROOT import TGraphErrors, TCanvas, TLegend, TLine, TPaveText
 from ROOT import kBlue, kRed, kGreen, kGray
 from numpy import array
 import math
@@ -91,6 +91,11 @@ l.AddEntry(g_reco_eff,"MuCS-MC reconstruction efficiency #it{#epsilon}_{MuCS-MC}
 l.AddEntry(g_reco_eff_data,"Data reconstruction efficiency #it{#epsilon}_{data}", "lp")
 
 l.Draw()
-
+pt = TPaveText(0.09,0.91,0.34,0.98, "ndc")
+pt.AddText("MicroBooNE")
+pt.SetFillColor(0)
+pt.SetBorderSize(0)
+pt.SetShadowColor(0)
+pt.Draw()
 c.Update()
 input()

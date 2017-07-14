@@ -53,7 +53,7 @@ def getEff(h_num, h_den):
 
 
 gStyle.SetOptStat(0)
-gStyle.SetPalette(87)
+gStyle.SetPalette(57)
 gStyle.SetPaintTextFormat(".2f")
 gStyle.SetNumberContours(999)
 
@@ -168,13 +168,22 @@ f_theta_phi_l = TFile("plots/data/e_theta_phi_l_pandoraCosmic.root")
 e_theta_phi_l = gDirectory.Get("h_theta_phi_l_tpc")
 h_reco = h_theta_phi_l_reco.Clone()
 h_geant = h_theta_phi_l_geant.Clone()
+h_geant2 = h_theta_phi_l_geant.Clone()
+h_geant2.SetName("h_geant2")
+f_mucs = TFile("f_data.root")
+h_mucs = gDirectory.Get("h_mucs")
+
 for i in range(1, h_theta_phi_l_reco.GetNbinsX()+2):
     for j in range(1, h_theta_phi_l_reco.GetNbinsY()+2):
         for k in range(1, h_theta_phi_l_reco.GetNbinsZ()+2):
             if h_theta_phi_l_reco.GetBinContent(i,j,k) and h_theta_phi_l_geant.GetBinContent(i,j,k):
                 if e_theta_phi_l.GetBinContent(i,j,k) > 0:
-                    eff = h_theta_phi_l_reco.GetBinContent(i,j,k)/h_theta_phi_l_geant.GetBinContent(i,j,k)
-                    error = math.sqrt((eff*(1-eff))/h_theta_phi_l_geant.GetBinContent(i,j,k))
+                    h_reco.SetBinContent(i,j,k,h_reco.GetBinContent(i,j,k)*h_mucs.GetBinContent(i,j,k)/h_geant.GetBinContent(i,j,k))
+                    eff = h_reco.GetBinContent(i,j,k)/h_mucs.GetBinContent(i,j,k)
+                    error = math.sqrt((eff*(1-eff))/h_geant.GetBinContent(i,j,k))
+                    h_geant.SetBinContent(i,j,k,h_mucs.GetBinContent(i,j,k))
+
+                    print(eff)
                 else:
                     eff = 0
                     error = 0
@@ -201,7 +210,7 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
             h_theta_phi_reco.SetBinError(i,j,error)
 
 pt = TPaveText(0.10,0.905,0.40,0.98, "ndc")
-pt.AddText("MicroBooNE in progress")
+#pt.AddText("MicroBooNE in progress")
 pt.SetFillColor(0)
 pt.SetBorderSize(0)
 pt.SetShadowColor(0)
@@ -209,9 +218,25 @@ h_theta_phi_reco.GetXaxis().SetRangeUser(60,120)
 h_theta_phi_reco.GetYaxis().SetRangeUser(-90,-45)
 h_theta_phi_reco.GetZaxis().SetRangeUser(0,1)
 
-h_theta_phi_reco.SetMarkerSize(2)
+h_theta_phi_reco.SetMarkerSize(2.5)
+gPad.SetBottomMargin(0.17)
+gPad.SetLeftMargin(0.13)
+gPad.SetTopMargin(0.15)
+gPad.SetRightMargin(0.15)
+
+h_theta_phi_reco.GetYaxis().SetTitleSize(0.07)
+h_theta_phi_reco.GetXaxis().SetTitleSize(0.07)
+h_theta_phi_reco.GetYaxis().SetTitleOffset(0.8)
+
+pt = TPaveText(0.13,0.855,0.42,0.98, "ndc")
+pt.AddText("MicroBooNE")
+pt.SetFillColor(0)
+pt.SetBorderSize(0)
+pt.SetShadowColor(0)
 h_theta_phi_reco.Draw("colz texte")
+
 pt.Draw()
+
 h_theta_phi_reco.SaveAs("plots/mc/theta_phi_mcc7.root")
 
 c_theta_phi.Update()
@@ -231,9 +256,20 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
 h_theta_l_reco.GetXaxis().SetRangeUser(60,120)
 h_theta_l_reco.GetYaxis().SetRangeUser(20,320)
 h_theta_l_reco.GetZaxis().SetRangeUser(0,1)
-h_theta_l_reco.SetMarkerSize(2)
+h_theta_l_reco.SetMarkerSize(2.5)
+gPad.SetBottomMargin(0.17)
+gPad.SetLeftMargin(0.13)
+gPad.SetTopMargin(0.15)
+gPad.SetRightMargin(0.15)
+
+h_theta_l_reco.GetYaxis().SetTitleSize(0.07)
+h_theta_l_reco.GetXaxis().SetTitleSize(0.07)
+h_theta_l_reco.GetYaxis().SetTitleOffset(0.8)
+
 h_theta_l_reco.Draw("colz texte")
+
 pt.Draw()
+
 h_theta_l_reco.SaveAs("plots/mc/theta_l_mcc7.root")
 c_theta_l.Update()
 c_theta_l.SaveAs("plots/mc/theta_l_mc.pdf")
@@ -252,8 +288,18 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsY()+2):
 h_phi_l_reco.GetXaxis().SetRangeUser(-90,-45)
 h_phi_l_reco.GetYaxis().SetRangeUser(20,320)
 h_phi_l_reco.GetZaxis().SetRangeUser(0,1)
-h_phi_l_reco.SetMarkerSize(2)
+h_phi_l_reco.SetMarkerSize(2.5)
+gPad.SetBottomMargin(0.17)
+gPad.SetLeftMargin(0.13)
+gPad.SetTopMargin(0.15)
+gPad.SetRightMargin(0.15)
+
+h_phi_l_reco.GetYaxis().SetTitleSize(0.07)
+h_phi_l_reco.GetXaxis().SetTitleSize(0.07)
+h_phi_l_reco.GetYaxis().SetTitleOffset(0.8)
+
 h_phi_l_reco.Draw("colz texte")
+
 pt.Draw()
 h_phi_l_reco.SaveAs("plots/mc/phi_l_mcc7.root")
 c_phi_l.Update()
@@ -264,10 +310,11 @@ c_l = TCanvas("c_l")
 for i in range(1,h_theta_phi_l_reco.GetNbinsZ()+2):
     reco = sum([h_reco.GetBinContent(j,k,i) for j in range(1,h_reco.GetNbinsX()+2) for k in range(1,h_reco.GetNbinsY()+2)])
     geant = sum([h_geant.GetBinContent(j,k,i) for j in range(1,h_geant.GetNbinsX()+2) for k in range(1,h_geant.GetNbinsY()+2)])
+    geant2 = sum([h_geant2.GetBinContent(j,k,i) for j in range(1,h_geant2.GetNbinsY()+2) for k in range(1,h_geant2.GetNbinsY()+2)])
 
     if reco and geant:
         eff = reco/geant
-        error = math.sqrt((eff*(1-eff))/geant)
+        error = math.sqrt((eff*(1-eff))/geant2)
         h_l_reco.SetBinContent(i,eff)
         h_l_reco.SetBinError(i,error)
         h_l_reco.SetLineColor(kRed+1)
@@ -286,9 +333,10 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsX()+2):
     reco = sum([h_reco.GetBinContent(i,j,k) for j in range(1,h_reco.GetNbinsY()+2) for k in range(1,h_reco.GetNbinsZ()+2)])
     geant = sum([h_geant.GetBinContent(i,j,k) for j in range(1,h_geant.GetNbinsY()+2) for k in range(1,h_geant.GetNbinsZ()+2)])
 
-    if reco and geant:
+    geant2 = sum([h_geant2.GetBinContent(i,j,k) for j in range(1,h_geant2.GetNbinsY()+2) for k in range(1,h_geant2.GetNbinsZ()+2)])
+    if reco and geant > 0:
         eff = reco/geant
-        error = math.sqrt((eff*(1-eff))/geant)
+        error = math.sqrt((eff*(1-eff))/geant2)
         h_theta_reco.SetBinContent(i,eff)
         h_theta_reco.SetBinError(i,error)
         h_theta_reco.SetLineColor(kRed+1)
@@ -310,6 +358,7 @@ for i in range(1,h_theta_phi_l_reco.GetNbinsY()+2):
     geant = sum([h_geant.GetBinContent(j,i,k) for j in range(1,h_geant.GetNbinsX()+2) for k in range(1,h_geant.GetNbinsZ()+2)])
 
     if reco and geant:
+        h_phi_geant.SetBinContent(i,geant)
         eff = reco/geant
         error = math.sqrt((eff*(1-eff))/geant)
         h_phi_reco.SetBinContent(i,eff)
@@ -344,4 +393,9 @@ h_theta_phi_l_reco.GetYaxis().SetRangeUser(-90,-45)
 h_theta_phi_l_reco.GetZaxis().SetRangeUser(20,320)
 
 c_3d.Update()
+
+f_mc = TFile("f_mc.root","RECREATE")
+h_theta_geant.Write()
+h_phi_geant.Write()
+f_mc.Close()
 input()

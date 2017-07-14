@@ -3,7 +3,7 @@
 from ROOT import TGraphErrors, TFile, TCanvas, kGray, TH2F, TH1F, gDirectory, kRed, kGreen, gStyle, TPad, TLine, TLegend, gPad, TPaveText
 from numpy import array
 gStyle.SetOptStat(0)
-gStyle.SetNumberContours(999)
+gStyle.SetNumberContours(99)
 gStyle.SetPaintTextFormat(".2f")
 
 def histo2graph(histo):
@@ -18,9 +18,14 @@ def histo2graph(histo):
 def draw_ratio(c_title, h_top = [], h_bottom = [], draw_top = [], draw_bottom = []):
     c = TCanvas(c_title)
     c.cd()
-    pad_bottom = TPad("pad_bottom","",0, 0.02, 1, 0.3)
+    pad_bottom = TPad("pad_bottom","",0,0.02105263,1,0.4)
+    pad_bottom.SetFrameBorderMode(0)
+    pad_bottom.SetFrameBorderMode(0)
+    pad_bottom.SetBorderMode(0)
     pad_bottom.SetTopMargin(0)
-    pad_bottom.SetBottomMargin(0.23)
+    pad_bottom.SetBottomMargin(0.3)
+
+
     pad_bottom.Draw()
     pad_bottom.cd()
     h_bottom[0].SetStats(0)
@@ -29,26 +34,31 @@ def draw_ratio(c_title, h_top = [], h_bottom = [], draw_top = [], draw_bottom = 
     h_bottom[0].Draw(draw_bottom[0])
     h_bottom[0].GetYaxis().SetRangeUser(0.91,1.09)
     h_bottom[0].GetYaxis().SetNdivisions(5,0,5)
-    h_bottom[0].GetYaxis().SetLabelSize(0.12)
+    h_bottom[0].GetYaxis().SetLabelSize(0.10)
     h_bottom[0].GetYaxis().SetTitleSize(0.13)
-    h_bottom[0].GetYaxis().SetTitleOffset(0.3)
-    h_bottom[0].GetXaxis().SetLabelSize(0.12)
+    h_bottom[0].GetYaxis().SetTitleOffset(0.35)
+    h_bottom[0].GetXaxis().SetLabelSize(0.10)
     h_bottom[0].GetXaxis().SetTitleSize(0.13)
     h_bottom[0].GetXaxis().SetTitleOffset(0.85)
     h_bottom[0].GetYaxis().SetTitle("Data/MC")
+    h_bottom[0].GetYaxis().CenterTitle()
+
     h_bottom[0].SetMarkerStyle(20)
     h_bottom[0].SetLineColor(1)
     for i, h in enumerate(h_bottom[1:]):
         h.Draw("same"+draw_bottom[i+1])
 
     c.cd()
-    pad_top = TPad("pad_top","",0, 0.3,1,1)
+    pad_top = TPad("pad_top","",0, 0.4,1,1)
     pad_top.SetBottomMargin(0)
+    pad_top.SetTopMargin(0.15)
     pad_top.Draw()
     pad_top.cd()
     h_top[0].SetStats(0)
     h_top[0].DrawCopy(draw_top[0])
-    h_top[0].GetYaxis().SetTitleOffset(0.7)
+    h_top[0].GetYaxis().SetTitleOffset(0.59)
+    h_top[0].GetYaxis().SetTitleSize(0.07)
+
     h_top[0].SetFillStyle(3001)
     h_top[0].Draw("e2same")
 
@@ -61,6 +71,8 @@ def draw_ratio(c_title, h_top = [], h_bottom = [], draw_top = [], draw_bottom = 
 
 def draw_canvas_1d(name):
     f_mc = TFile("plots/mc/%s_mcc7.root" % name)
+    print(f_mc.ls())
+    print(name)
     h_mc = gDirectory.Get("h_%s_reco" % name)
     h_mc.SetName("h_%s_reco" % name)
     h_mc.SetLineColor(kRed+1)
@@ -83,6 +95,10 @@ def draw_canvas_1d(name):
     x_maxbin = h_mc.FindLastBinAbove()
     high = h_mc.GetXaxis().GetBinUpEdge(x_maxbin)
     h_mc.GetXaxis().SetRangeUser(low,high)
+    h_mc.GetYaxis().SetTitleSize(0.08)
+    h_mc.GetYaxis().SetLabelSize(0.065)
+    h_mc.GetYaxis().SetTitleOffset(0.59)
+
     h_ratio.GetXaxis().SetRangeUser(low,high)
 
 
@@ -96,26 +112,22 @@ def draw_canvas_1d(name):
     g_stat.SetLineWidth(2)
     g_stat.SetLineColor(kGray+2)
 
-    pt = TPaveText(0.10,0.905,0.40,0.98, "ndc")
-    pt.AddText("MicroBooNE in progress")
+    pt = TPaveText(0.09,0.855,0.32,0.98, "ndc")
+    pt.AddText("MicroBooNE")
     pt.SetFillColor(0)
     pt.SetBorderSize(0)
     pt.SetShadowColor(0)
 
-    leg = TLegend(0.66,0.09,0.86,0.26)
+    leg = TLegend(0.55,0.09,0.86,0.4)
     leg.AddEntry(g_sys,"Data - stat. #oplus sys.","ep")
     leg.AddEntry(g_stat,"Data - stat. only","f")
     leg.AddEntry(h_mc,"Monte Carlo","f")
 
     canvas = draw_ratio("c_%s" % name, [h_mc, g_stat, g_sys, pt, leg], [h_ratio], ["hist","2","p","",""],["ep"])
     canvas.SaveAs("plots/%s.pdf" % name)
+    canvas.SaveAs("plots/%s.C" % name)
 
 def draw_canvas_2d(name):
-    pt = TPaveText(0.10,0.905,0.40,0.98, "ndc")
-    pt.AddText("MicroBooNE in progress")
-    pt.SetFillColor(0)
-    pt.SetBorderSize(0)
-    pt.SetShadowColor(0)
 
     f_mc = TFile("plots/mc/%s_mcc7.root" % name)
     h_mc = gDirectory.Get("h_%s_reco" % name)
@@ -140,12 +152,28 @@ def draw_canvas_2d(name):
     h.GetYaxis().SetRangeUser(low_y,high_y)
 
     c = TCanvas("c_%s" % name)
+    h.SetMarkerSize(2.5)
+    gPad.SetBottomMargin(0.17)
+    gPad.SetLeftMargin(0.13)
+    gPad.SetTopMargin(0.15)
+    gPad.SetRightMargin(0.15)
+
+    h.GetYaxis().SetTitleSize(0.07)
+    h.GetXaxis().SetTitleSize(0.07)
+    h.GetYaxis().SetTitleOffset(0.8)
+
+    pt = TPaveText(0.13,0.855,0.42,0.98, "ndc")
+    pt.AddText("MicroBooNE")
+    pt.SetFillColor(0)
+    pt.SetBorderSize(0)
+    pt.SetShadowColor(0)
     h.Draw("colz texte")
 
     pt.Draw()
-    gPad.SetRightMargin(0.15)
     c.Update()
     c.SaveAs("plots/%s.pdf" % name)
+    c.SaveAs("plots/%s.p" % name)
+
     return c
 
 
